@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% from "components.html" import empty_state, file_type_icon, icon_upload, icon_download, icon_shield, note_card, proof_status_badge %}
+{% block title %}Documents - Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Your documents</h2>
+        <p class="text-muted page-header-sub">Wills, deeds, policies, IDs — the papers your family would otherwise hunt for.</p>
+    </div>
+    <a href="{{ url_for('document_upload') }}" class="btn btn-primary">{{ icon_upload() }} Upload document</a>
+</div>
+
+{% set proofs = documents | selectattr("proof") | list %}
+{% if proofs and not notary.enabled %}
+<p class="notary-note">
+    {{ icon_shield(size=15) }}
+    {% if not notary.contract_set %}
+    <span>Notarization is switched off until a contract is set up — see <code>CONTRACT_DEPLOY.md</code>. Your fingerprints are saved and ready.</span>
+    {% else %}
+    <span>One last step to switch notarization on: run <code>python vendor_ethers.py</code> once, then restart the app.</span>
+    {% endif %}
+</p>
+{% endif %}
+
+{% if documents %}
+<div id="notary-root"
+     data-contract="{{ notary.contract }}"
+     data-chain-id="{{ notary.chain_id }}"
+     data-rpc="{{ notary.rpc_url }}"
+     data-explorer="{{ notary.explorer }}"
+     data-abi-url="{{ url_for('static', filename='contract/DocumentNotary.abi.json') }}"
+     data-csrf="{{ csrf_token() }}">
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Document</th>
+            <th>Category</th>
+            <th>Added</th>
+            <th>Size</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for doc in documents %}
+        {% set ext = doc.original_filename.rsplit(".", 1)[-1].lower() if "." in doc.original_filename else "" %}
+        <tr>
+            <td data-label="Document">
+                <div class="doc-name">
+                    <span class="doc-icon">{{ file_type_icon(ext) }}</span>
+                    <div class="doc-name-text">
+                        <div class="doc-filename">{{ doc.original_filename }}</div>
+                        {% if doc.description %}<div class="doc-note">{{ doc.description }}</div>{% endif %}
+                        <div class="doc-proof" id="notary-badge-{{ doc.id }}"{% if doc.proof %} title="Fingerprint (SHA-256): {{ doc.proof.sha256_hash }}"{% endif %}>{{ proof_status_badge(doc.proof.status if doc.proof else none, integrity.get(doc.id, "ok")) }}</div>
+                        {% if doc.proof %}
+                        <div class="notary-result" id="notary-result-{{ doc.id }}" role="status" aria-live="polite" hidden></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </td>
+            <td data-label="Category"><span class="tag-pill">{{ doc.category }}</span></td>
+            <td data-label="Added"><span class="doc-meta">{{ doc.uploaded_at.strftime("%d %b %Y") }}</span></td>
+            <td data-label="Size">
+                <span class="doc-meta">
+                    {%- if doc.file_size >= 1048576 -%}
+                        {{ "%.1f"|format(doc.file_size / 1048576) }} MB
+                    {%- else -%}
+                        {{ "%.0f"|format((doc.file_size / 1024) if doc.file_size else 0) }} KB
+                    {%- endif -%}
+                </span>
+            </td>
+            <td class="actions">
+                <a href="{{ url_for('document_download', document_id=doc.id) }}" class="btn btn-small btn-outline">{{ icon_download() }} Download</a>
+                {% if doc.proof and notary.enabled %}
+                    {% if doc.proof.status in ("PENDING", "FAILED") %}
+                    <button type="button" class="btn btn-small btn-primary" data-notarize data-doc-id="{{ doc.id }}">{{ "Try again" if doc.proof.status == "FAILED" else "Notarize" }}</button>
+                    {% elif doc.proof.status == "NOTARIZED" %}
+                    <button type="button" class="btn btn-small btn-outline" data-verify data-doc-id="{{ doc.id }}">{{ icon_shield(size=13) }} Verify</button>
+                    {% endif %}
+                {% endif %}
+                {% if not doc.proof %}
+                <form method="POST" action="{{ url_for('document_seal', document_id=doc.id) }}" class="inline-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-small btn-outline" title="Save a private fingerprint so you'll know if this file ever changes.">{{ icon_shield(size=13) }} Seal</button>
+                </form>
+                {% endif %}
+                {% if doc.proof and doc.proof.status == "NOTARIZED" and doc.proof.tx_hash %}
+                <a href="{{ notary.explorer }}/tx/{{ doc.proof.tx_hash }}" class="btn btn-small btn-outline" target="_blank" rel="noopener noreferrer">View record</a>
+                {% endif %}
+                {% if doc.proof and doc.proof.status == "NOTARIZED" %}
+                <form method="POST" action="{{ url_for('document_delete', document_id=doc.id) }}" class="inline-form" onsubmit="return confirm('Delete this document? The file will be permanently removed. Its fingerprint stays on the public blockchain and can never be deleted.');">
+                {% else %}
+                <form method="POST" action="{{ url_for('document_delete', document_id=doc.id) }}" class="inline-form" onsubmit="return confirm('Delete this document? The file will be permanently removed.');">
+                {% endif %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+{{ empty_state(
+    "Nothing filed away yet",
+    "Upload the papers that matter — a will, property deeds, insurance policies. Your family will thank you.",
+    url_for('document_upload'),
+    "Upload your first document"
+) }}
+{% endif %}
+{% if notary.enabled and documents %}
+<script src="{{ url_for('static', filename='vendor/ethers.umd.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/notarize.js') }}"></script>
+{% endif %}
+{% endblock %}

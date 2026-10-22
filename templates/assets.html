@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "components.html" import empty_state, icon_plus, icon_users, icon_box %}
+{% block title %}Assets - Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Your assets</h2>
+        <p class="text-muted page-header-sub">Property, accounts, and anything else you'd want passed on.</p>
+    </div>
+    <a href="{{ url_for('asset_add') }}" class="btn btn-primary">{{ icon_plus() }} Add asset</a>
+</div>
+
+{% if assets %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Provider</th>
+            <th>Value</th>
+            <th>Nominees</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for asset in assets %}
+        <tr>
+            <td data-label="Name"><span class="cell-primary">{{ asset.name }}</span></td>
+            <td data-label="Category"><span class="tag-pill">{{ asset.category }}</span></td>
+            <td data-label="Provider">{{ asset.provider or "—" }}</td>
+            <td data-label="Value">{% if asset.approx_value %}${{ "{:,.2f}".format(asset.approx_value) }}{% else %}—{% endif %}</td>
+            <td data-label="Nominees">
+                {% if asset.nominees %}
+                    {{ asset.nominees | map(attribute="name") | join(", ") }}
+                {% else %}
+                    <span class="text-muted">Not assigned yet</span>
+                {% endif %}
+            </td>
+            <td class="actions">
+                <a href="{{ url_for('assign_nominee', asset_id=asset.id) }}" class="btn btn-small btn-outline">{{ icon_users(size=13) }} Nominees</a>
+                <a href="{{ url_for('asset_edit', asset_id=asset.id) }}" class="btn btn-small btn-outline">Edit</a>
+                <form method="POST" action="{{ url_for('asset_delete', asset_id=asset.id) }}" class="inline-form" onsubmit="return confirm('Delete this asset? This can\'t be undone.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+{{ empty_state(
+    "Start with one thing that matters",
+    "Add the things that matter — property, accounts, or anything you'd want passed on.",
+    url_for('asset_add'),
+    "Add your first asset"
+) }}
+{% endif %}
+{% endblock %}

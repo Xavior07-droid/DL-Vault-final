@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: dl-vault
+    runtime: python
+    plan: free
+    # vendor_ethers.py downloads the pinned ethers.js used for notarization.
+    # If it fails the app still works; notarization just stays switched off.
+    buildCommand: pip install -r requirements.txt && (python vendor_ethers.py || echo "ethers.js not vendored; notarization stays off")
+    startCommand: sh start.sh
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV_PRODUCTION
+        value: "true"
+      - key: SEED_DEMO
+        value: "true"
+      - key: NOTARIZATION_CONTRACT_ADDRESS
+        sync: false

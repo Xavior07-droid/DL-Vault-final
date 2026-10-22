@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_users, icon_x, empty_state %}
+{% block title %}Nominees for {{ asset.name }} - Digital Legacy Vault{% endblock %}
+{% block content %}
+<a href="{{ url_for('assets_list') }}" class="back-link">← Back to assets</a>
+
+<div class="form-card form-card-wide">
+    <div class="form-card-icon">{{ icon_users(size=20) }}</div>
+    <h2>Nominees for "{{ asset.name }}"</h2>
+    <p class="text-muted form-card-sub">Choose who should be notified or given access to this asset.</p>
+
+    {% if asset.nominees %}
+    <ul class="assign-list">
+        {% for nominee in asset.nominees %}
+        <li>
+            <div>
+                <span class="cell-primary">{{ nominee.name }}</span>
+                <span class="tag-pill">{{ nominee.relationship_ }}</span>
+            </div>
+            <form method="POST" action="{{ url_for('remove_nominee', asset_id=asset.id, nominee_id=nominee.id) }}" class="inline-form" onsubmit='return confirm("Remove " + {{ nominee.name | tojson }} + " from this asset?");'>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-small btn-outline" aria-label="Remove {{ nominee.name }}">{{ icon_x(size=13) }} Remove</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-state">No one is looking after this asset yet — choose someone below.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Assign a nominee</h3>
+    {% if all_nominees %}
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="nominee_id">Select nominee</label>
+            <select id="nominee_id" name="nominee_id" required>
+                <option value="" disabled selected>Choose a nominee…</option>
+                {% for nominee in all_nominees %}
+                {% set already_assigned = nominee in asset.nominees %}
+                <option value="{{ nominee.id }}" {% if already_assigned %}disabled{% endif %}>
+                    {{ nominee.name }} ({{ nominee.relationship_ }}){% if already_assigned %} — already assigned{% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ icon_users(size=15) }} Assign nominee</button>
+            <a href="{{ url_for('assets_list') }}" class="btn btn-outline">Done</a>
+        </div>
+    </form>
+    {% else %}
+    {{ empty_state(
+        "No nominees to assign yet",
+        "You'll need to add at least one nominee before you can assign them to an asset.",
+        url_for('nominee_add'),
+        "Add a nominee"
+    ) }}
+    {% endif %}
+</div>
+{% endblock %}

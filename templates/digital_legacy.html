@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "components.html" import empty_state, icon_plus, account_action %}
+{% block title %}Digital legacy - Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Your digital life</h2>
+        <p class="text-muted page-header-sub">Email, social media, subscriptions, wallets — decide what happens to each one.</p>
+    </div>
+    <a href="{{ url_for('digital_account_add') }}" class="btn btn-primary">{{ icon_plus() }} Add account</a>
+</div>
+
+{% if accounts %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th>Account</th>
+            <th>What should happen</th>
+            <th>Beneficiary</th>
+            <th>Instructions</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for account in accounts %}
+        <tr>
+            <td data-label="Service"><span class="cell-primary">{{ account.service }}</span></td>
+            <td data-label="Account">{{ account.account_identifier }}</td>
+            <td data-label="What should happen">{{ account_action(account.action) }}</td>
+            <td data-label="Beneficiary">{{ account.beneficiary or "—" }}</td>
+            <td data-label="Instructions">{{ account.instructions or "—" }}</td>
+            <td class="actions">
+                <a href="{{ url_for('digital_account_edit', account_id=account.id) }}" class="btn btn-small btn-outline">Edit</a>
+                <form method="POST" action="{{ url_for('digital_account_delete', account_id=account.id) }}" class="inline-form" onsubmit="return confirm('Remove this account from your list? This can\'t be undone.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+{{ empty_state(
+    "Your digital life is still unwritten",
+    "Add the accounts your family might need — email, photos, social media — and say what should happen to each.",
+    url_for('digital_account_add'),
+    "Add your first account"
+) }}
+{% endif %}
+{% endblock %}

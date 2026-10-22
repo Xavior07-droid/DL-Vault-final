@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_box, icon_users, icon_scroll, icon_file, icon_globe, icon_check_square, icon_heart_handshake, icon_pulse, icon_clipboard_check, icon_shield, icon_alert, icon_check %}
+{% block title %}Dashboard - Digital Legacy Vault{% endblock %}
+{% block content %}
+
+<div class="dash-greeting">
+    <h2>Welcome back, {{ current_user.full_name.split(' ')[0] }}</h2>
+    <p class="text-muted">Here's where things stand with your vault today.</p>
+</div>
+
+<div class="dash-top-grid">
+    <div class="card dash-completeness-card">
+        <div class="dash-completeness-ring" style="--pct: {{ will_completeness.percent }};" role="img" aria-label="Will completeness {{ will_completeness.percent }} percent">
+            <span class="dash-completeness-number">{{ will_completeness.percent }}%</span>
+        </div>
+        <div class="dash-completeness-text">
+            <h3>Will completeness</h3>
+            {% if will_completeness.total_count == 0 %}
+            <p class="text-muted">Add an asset or an instruction to start tracking this.</p>
+            {% elif will_completeness.percent == 100 %}
+            <p class="text-muted">Everything is linked up — nice and tidy.</p>
+            {% else %}
+            <p class="text-muted">{{ will_completeness.pass_count }} of {{ will_completeness.total_count }} checks pass. The Will Checker can show you exactly what's left.</p>
+            {% endif %}
+            <a href="{{ url_for('will_checker') }}" class="btn btn-outline btn-small">{{ icon_clipboard_check(size=14) }} Open Will Checker</a>
+        </div>
+    </div>
+
+    <div class="card dash-life-card">
+        {% if verification.status == "OK" %}
+        <div class="dash-life-icon dash-life-icon-ok">{{ icon_shield(size=22) }}</div>
+        <div>
+            <h3>You're checked in</h3>
+            <p class="text-muted">Life verification is up to date. Nothing needed from you right now.</p>
+        </div>
+        {% else %}
+        <div class="dash-life-icon dash-life-icon-warn">{{ icon_alert(size=22) }}</div>
+        <div>
+            <h3>Check-in needed</h3>
+            <p class="text-muted">It's time to confirm you're still with us — just a quick click.</p>
+        </div>
+        {% endif %}
+        <a href="{{ url_for('life_verification') }}" class="btn btn-small {{ 'btn-outline' if verification.status == 'OK' else 'btn-accent' }}">{{ icon_pulse(size=14) }} Life Verification</a>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <a href="{{ url_for('assets_list') }}" class="stat-card stat-card-link">
+        <div class="stat-icon">{{ icon_box() }}</div>
+        <div class="stat-number">{{ stats.assets }}</div>
+        <div class="stat-label">Assets</div>
+    </a>
+    <a href="{{ url_for('nominees_list') }}" class="stat-card stat-card-link">
+        <div class="stat-icon">{{ icon_users() }}</div>
+        <div class="stat-number">{{ stats.nominees }}</div>
+        <div class="stat-label">Nominees</div>
+    </a>
+    <a href="{{ url_for('will_list') }}" class="stat-card stat-card-link">
+        <div class="stat-icon">{{ icon_scroll() }}</div>
+        <div class="stat-number">{{ stats.will_instructions }}</div>
+        <div class="stat-label">Will Instructions</div>
+    </a>
+    <a href="{{ url_for('documents_list') }}" class="stat-card stat-card-link">
+        <div class="stat-icon">{{ icon_file() }}</div>
+        <div class="stat-number">{{ stats.documents }}</div>
+        <div class="stat-label">Documents</div>
+    </a>
+    <a href="{{ url_for('digital_accounts_list') }}" class="stat-card stat-card-link">
+        <div class="stat-icon">{{ icon_globe() }}</div>
+        <div class="stat-number">{{ stats.digital_accounts }}</div>
+        <div class="stat-label">Digital Accounts</div>
+    </a>
+    <a href="{{ url_for('tasks_list') }}" class="stat-card stat-card-link">
+        <div class="stat-icon">{{ icon_check_square() }}</div>
+        <div class="stat-number">{{ stats.tasks_pending }}</div>
+        <div class="stat-label">Pending Tasks</div>
+    </a>
+</div>
+
+<h3 class="dash-section-title">Quick access</h3>
+<div class="menu-grid">
+    <a href="{{ url_for('assets_list') }}" class="menu-card">{{ icon_box(size=20) }} Assets</a>
+    <a href="{{ url_for('nominees_list') }}" class="menu-card">{{ icon_users(size=20) }} Nominees</a>
+    <a href="{{ url_for('will_list') }}" class="menu-card">{{ icon_scroll(size=20) }} Will Instructions</a>
+    <a href="{{ url_for('will_checker') }}" class="menu-card">{{ icon_clipboard_check(size=20) }} Will Checker</a>
+    <a href="{{ url_for('documents_list') }}" class="menu-card">{{ icon_file(size=20) }} Documents</a>
+    <a href="{{ url_for('digital_accounts_list') }}" class="menu-card">{{ icon_globe(size=20) }} Digital Legacy</a>
+    <a href="{{ url_for('trusted_contacts_list') }}" class="menu-card">{{ icon_heart_handshake(size=20) }} Trusted Contacts</a>
+    <a href="{{ url_for('life_verification') }}" class="menu-card">{{ icon_pulse(size=20) }} Life Verification</a>
+    <a href="{{ url_for('tasks_list') }}" class="menu-card">{{ icon_check_square(size=20) }} Inheritance Tasks</a>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_globe %}
+{% block title %}{{ "Edit" if account else "Add" }} Digital Account - Digital Legacy Vault{% endblock %}
+{% block content %}
+<a href="{{ url_for('digital_accounts_list') }}" class="back-link">← Back to digital life</a>
+<div class="form-card">
+    <div class="form-card-icon">{{ icon_globe(size=20) }}</div>
+    <h2>{{ "Edit account" if account else "Add an online account" }}</h2>
+    <p class="text-muted form-card-sub">{{ "Update the details below." if account else "Tell us where it lives and what should happen to it." }}</p>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="service">Service</label>
+                <input type="text" id="service" name="service" placeholder="e.g. Google, Instagram, Netflix" value="{{ account.service if account else '' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="account_identifier">Account / username</label>
+                <input type="text" id="account_identifier" name="account_identifier" placeholder="e.g. name@gmail.com" value="{{ account.account_identifier if account else '' }}" required>
+                <span class="form-hint">Never enter a password here — just how to find the account.</span>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="action">What should happen to it?</label>
+                <select id="action" name="action" required>
+                    {% for a in actions %}
+                    <option value="{{ a }}" {% if account and account.action == a %}selected{% endif %}>{{ a }}</option>
+                    {% endfor %}
+                </select>
+                <span class="form-hint">Preserve keeps it as is · Memorialize turns it into a remembrance · Transfer hands it over · Delete closes it for good.</span>
+            </div>
+            <div class="form-group">
+                <label for="beneficiary">Beneficiary <span class="text-muted">(optional)</span></label>
+                <input type="text" id="beneficiary" name="beneficiary" placeholder="e.g. Brother" value="{{ account.beneficiary if account else '' }}">
+                <span class="form-hint">Who should take this over, if it's being transferred.</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="instructions">Anything else they should know? <span class="text-muted">(optional)</span></label>
+            <textarea id="instructions" name="instructions" rows="3" placeholder="e.g. Keep the photos, close everything else">{{ account.instructions if account else '' }}</textarea>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ "Save changes" if account else "Add account" }}</button>
+            <a href="{{ url_for('digital_accounts_list') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

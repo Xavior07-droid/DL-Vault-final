@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_scroll %}
+{% block title %}{{ "Edit" if instruction else "Add" }} Will Instruction - Digital Legacy Vault{% endblock %}
+{% block content %}
+<a href="{{ url_for('will_list') }}" class="back-link">← Back to will instructions</a>
+<div class="form-card form-card-wide">
+    <div class="form-card-icon">{{ icon_scroll(size=20) }}</div>
+    <h2>{{ "Edit will instruction" if instruction else "Add a will instruction" }}</h2>
+    <p class="text-muted form-card-sub">{{ "Update the details below." if instruction else "Say who should get what, and how — plainly, in your own words." }}</p>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="asset_id">Asset (optional)</label>
+                <select id="asset_id" name="asset_id">
+                    <option value="">No specific asset</option>
+                    {% for asset in user_assets %}
+                    <option value="{{ asset.id }}" {% if instruction and instruction.asset_id == asset.id %}selected{% endif %}>{{ asset.name }}</option>
+                    {% endfor %}
+                </select>
+                {% if not user_assets %}
+                <span class="form-hint">You haven't added any assets yet — that's fine, this instruction can stand on its own.</span>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="beneficiary_name">Beneficiary</label>
+                <input type="text" id="beneficiary_name" name="beneficiary_name" placeholder="e.g. Mother" value="{{ instruction.beneficiary_name if instruction else '' }}" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="instruction_text">Instruction</label>
+            <textarea id="instruction_text" name="instruction_text" rows="4" placeholder="e.g. Transfer the family home to my mother, Jane, to live in for as long as she wishes." required>{{ instruction.instruction_text if instruction else '' }}</textarea>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ "Save changes" if instruction else "Add instruction" }}</button>
+            <a href="{{ url_for('will_list') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

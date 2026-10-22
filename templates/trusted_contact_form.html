@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_heart_handshake %}
+{% block title %}{{ "Edit" if contact else "Add" }} Trusted Contact - Digital Legacy Vault{% endblock %}
+{% block content %}
+<a href="{{ url_for('trusted_contacts_list') }}" class="back-link">← Back to trusted contacts</a>
+<div class="form-card">
+    <div class="form-card-icon">{{ icon_heart_handshake(size=20) }}</div>
+    <h2>{{ "Edit contact" if contact else "Add a trusted contact" }}</h2>
+    <p class="text-muted form-card-sub">{{ "Update their details below." if contact else "Someone who'd know what to do — a friend, sibling, or your lawyer. They never get access to your vault." }}</p>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" value="{{ contact.name if contact else '' }}" placeholder="e.g. Priya Nair" required>
+            </div>
+            <div class="form-group">
+                <label for="relationship">Relationship</label>
+                <input type="text" id="relationship" name="relationship" placeholder="e.g. Friend, Sibling, Lawyer" value="{{ contact.relationship_ if contact else '' }}" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="email">Email <span class="text-muted">(optional)</span></label>
+                <input type="email" id="email" name="email" value="{{ contact.email if contact else '' }}" placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone <span class="text-muted">(optional)</span></label>
+                <input type="tel" id="phone" name="phone" value="{{ contact.phone if contact else '' }}" placeholder="+91 98765 43210">
+            </div>
+        </div>
+        <span class="form-hint">Add at least one way to reach them — otherwise a missed check-in has nobody to contact.</span>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ "Save changes" if contact else "Add contact" }}</button>
+            <a href="{{ url_for('trusted_contacts_list') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "components.html" import empty_state, icon_plus, icon_box %}
+{% block title %}Nominees - Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Your nominees</h2>
+        <p class="text-muted page-header-sub">The people you'd want to carry things forward.</p>
+    </div>
+    <a href="{{ url_for('nominee_add') }}" class="btn btn-primary">{{ icon_plus() }} Add nominee</a>
+</div>
+
+{% if nominees %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationship</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Assigned Assets</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for nominee in nominees %}
+        <tr>
+            <td data-label="Name"><span class="cell-primary">{{ nominee.name }}</span></td>
+            <td data-label="Relationship"><span class="tag-pill">{{ nominee.relationship_ }}</span></td>
+            <td data-label="Email">{{ nominee.email or "—" }}</td>
+            <td data-label="Phone">{{ nominee.phone or "—" }}</td>
+            <td data-label="Assigned Assets">
+                {% if nominee.assets %}
+                    {{ nominee.assets | map(attribute="name") | join(", ") }}
+                {% else %}
+                    <span class="text-muted">No assets assigned yet</span>
+                {% endif %}
+            </td>
+            <td class="actions">
+                <a href="{{ url_for('nominee_edit', nominee_id=nominee.id) }}" class="btn btn-small btn-outline">Edit</a>
+                <form method="POST" action="{{ url_for('nominee_delete', nominee_id=nominee.id) }}" class="inline-form" onsubmit="return confirm('Delete this nominee? This can\'t be undone.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+{{ empty_state(
+    "Add the people who matter",
+    "Nominees are the people you'd want notified, trusted, or given access when the time comes.",
+    url_for('nominee_add'),
+    "Add your first nominee"
+) }}
+{% endif %}
+{% endblock %}

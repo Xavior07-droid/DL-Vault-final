@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "components.html" import empty_state, icon_plus, icon_clipboard_check %}
+{% block title %}Will Instructions - Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Will &amp; inheritance instructions</h2>
+        <p class="text-muted page-header-sub">Who should get what, and how — in your own words.</p>
+    </div>
+    <div class="actions">
+        <a href="{{ url_for('will_checker') }}" class="btn btn-outline">{{ icon_clipboard_check(size=14) }} Run checker</a>
+        <a href="{{ url_for('will_add') }}" class="btn btn-primary">{{ icon_plus() }} Add instruction</a>
+    </div>
+</div>
+
+{% if instructions %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Asset</th>
+            <th>Beneficiary</th>
+            <th>Instruction</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for instruction in instructions %}
+        <tr>
+            <td data-label="Asset">
+                {% if instruction.asset %}
+                    <span class="tag-pill">{{ instruction.asset.name }}</span>
+                {% else %}
+                    <span class="text-muted">Not tied to a specific asset</span>
+                {% endif %}
+            </td>
+            <td data-label="Beneficiary"><span class="cell-primary">{{ instruction.beneficiary_name }}</span></td>
+            <td data-label="Instruction">{{ instruction.instruction_text }}</td>
+            <td class="actions">
+                <a href="{{ url_for('will_edit', instruction_id=instruction.id) }}" class="btn btn-small btn-outline">Edit</a>
+                <form method="POST" action="{{ url_for('will_delete', instruction_id=instruction.id) }}" class="inline-form" onsubmit="return confirm('Delete this instruction? This can\'t be undone.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+{{ empty_state(
+    "Put your wishes into words",
+    "Add instructions for your assets so the people you trust know exactly what you'd want.",
+    url_for('will_add'),
+    "Add your first instruction"
+) }}
+{% endif %}
+{% endblock %}

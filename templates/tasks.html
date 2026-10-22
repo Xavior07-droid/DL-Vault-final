@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% from "components.html" import empty_state, task_status_badge, icon_plus, icon_list_checks, icon_pencil, icon_trash %}
+{% block title %}Inheritance Tasks - Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Inheritance tasks</h2>
+        <p class="text-muted page-header-sub">A gentle checklist for whoever looks after things later — calling the bank, informing the insurer, sorting the papers.</p>
+    </div>
+    <a href="{{ url_for('task_add') }}" class="btn btn-primary">{{ icon_plus() }} Add a task</a>
+</div>
+
+{% if tasks %}
+<section class="card task-progress" aria-labelledby="task-progress-title">
+    <div class="task-progress-head">
+        <h3 id="task-progress-title">
+            {% if counts['Completed'] == total %}
+                Everything's done — well looked after
+            {% else %}
+                {{ counts['Completed'] }} of {{ total }} done
+            {% endif %}
+        </h3>
+        <span class="task-progress-percent">{{ percent_done }}%</span>
+    </div>
+    <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ percent_done }}" aria-label="Tasks completed">
+        <div class="progress-fill" style="width: {{ percent_done }}%;"></div>
+    </div>
+    <ul class="task-counts">
+        <li>{{ task_status_badge("Pending") }} <span>{{ counts['Pending'] }}</span></li>
+        <li>{{ task_status_badge("In Progress") }} <span>{{ counts['In Progress'] }}</span></li>
+        <li>{{ task_status_badge("Completed") }} <span>{{ counts['Completed'] }}</span></li>
+    </ul>
+</section>
+
+<table class="data-table task-table">
+    <thead>
+        <tr>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Move it along</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in tasks %}
+        <tr class="{{ 'task-done' if task.status == 'Completed' else '' }}">
+            <td data-label="Task">
+                <div class="task-title">{{ task.title }}</div>
+                {% if task.description %}<div class="task-desc">{{ task.description }}</div>{% endif %}
+            </td>
+            <td data-label="Status">{{ task_status_badge(task.status) }}</td>
+            <td data-label="Move it along">
+                <form method="POST" action="{{ url_for('task_update_status', task_id=task.id) }}" class="status-switch" role="group" aria-label="Change status of {{ task.title }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {% for s in statuses %}
+                    <button type="submit" name="status" value="{{ s }}"
+                            class="status-switch-btn{{ ' is-current' if task.status == s else '' }}"
+                            {% if task.status == s %}aria-pressed="true" disabled{% else %}aria-pressed="false"{% endif %}>
+                        {{ s }}
+                    </button>
+                    {% endfor %}
+                </form>
+            </td>
+            <td class="actions">
+                <a href="{{ url_for('task_edit', task_id=task.id) }}" class="btn btn-small btn-outline">{{ icon_pencil() }} Edit</a>
+                <form method="POST" action="{{ url_for('task_delete', task_id=task.id) }}" class="inline-form" onsubmit="return confirm('Delete this task? This can\'t be undone.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-small btn-danger">{{ icon_trash() }} Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+{{ empty_state(
+    "Your list is clear for now",
+    "Add the jobs someone would need to tackle later — closing an account, notifying a bank, collecting papers. You can tick them off as you go.",
+    url_for('task_add'),
+    "Add your first task"
+) }}
+{% endif %}
+{% endblock %}

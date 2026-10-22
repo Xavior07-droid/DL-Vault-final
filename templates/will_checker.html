@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "components.html" import badge, icon_clipboard_check, empty_state %}
+{% block title %}Will Checker - Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Will checker</h2>
+        <p class="text-muted page-header-sub">A simple rule-based check of your vault — no AI involved.</p>
+    </div>
+    <a href="{{ url_for('will_list') }}" class="btn btn-outline">Back to will</a>
+</div>
+
+{% if not has_data %}
+{{ empty_state(
+    "Nothing to look over yet",
+    "Add an asset or a will instruction first, then come back and we'll look it over together.",
+    url_for('asset_add'),
+    "Add your first asset"
+) }}
+{% else %}
+
+<div class="dash-top-grid checker-top-grid">
+    <div class="card dash-completeness-card">
+        <div class="dash-completeness-ring" style="--pct: {{ completeness.percent }};" role="img" aria-label="Will completeness {{ completeness.percent }} percent">
+            <span class="dash-completeness-number">{{ completeness.percent }}%</span>
+        </div>
+        <div class="dash-completeness-text">
+            <h3>Overall completeness</h3>
+            <p class="text-muted">
+                {% if completeness.percent == 100 %}
+                Every check passes — your vault is in good shape.
+                {% else %}
+                {{ completeness.pass_count }} of {{ completeness.total_count }} checks pass across your assets and instructions.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="card checker-counts-card">
+        <div class="checker-count checker-count-pass">
+            <span class="checker-count-number">{{ pass_count }}</span>
+            <span class="checker-count-label">Passed</span>
+        </div>
+        <div class="checker-count checker-count-warning">
+            <span class="checker-count-number">{{ warning_count }}</span>
+            <span class="checker-count-label">Warnings</span>
+        </div>
+    </div>
+</div>
+
+{% if warning_count == 0 %}
+<p class="checker-all-clear">{{ icon_clipboard_check(size=15) }} Everything checks out — no warnings right now.</p>
+{% endif %}
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Rule</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Detail</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in results %}
+        <tr class="{{ 'row-warning' if r.status == 'WARNING' }}">
+            <td data-label="Rule">{{ r.rule }}</td>
+            <td data-label="Subject"><span class="cell-primary">{{ r.subject }}</span></td>
+            <td data-label="Status">{{ badge(r.status) }}</td>
+            <td data-label="Detail">{{ r.detail }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

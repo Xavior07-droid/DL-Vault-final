@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% from "components.html" import life_status_badge, note_card, icon_shield, icon_check, icon_alert, icon_heart_pulse, icon_clock, icon_flask %}
+{% block title %}Life Verification - Digital Legacy Vault{% endblock %}
+{% block content %}
+{% set is_ok = record.status == "OK" %}
+
+<div class="page-header">
+    <div>
+        <h2>Life verification</h2>
+        <p class="text-muted page-header-sub">A gentle, regular check-in so the people you trust know all is well.</p>
+    </div>
+</div>
+
+{{ note_card(
+    "Nothing is ever released automatically",
+    "This is a simulation. Missing a check-in only flags your vault for review. No asset, document or account is shared, moved or changed.",
+    icon_shield(size=18)
+) }}
+
+<section class="card lv-status {{ 'lv-status-ok' if is_ok else 'lv-status-due' }}" aria-live="polite">
+    <div class="lv-status-icon">
+        {% if is_ok %}{{ icon_heart_pulse() }}{% else %}{{ icon_alert(size=26) }}{% endif %}
+    </div>
+    <div class="lv-status-text">
+        <div class="lv-status-badge">{{ life_status_badge(record.status) }}</div>
+        {% if is_ok %}
+            <h3>You're all checked in</h3>
+            <p>
+                {% if days_left <= 0 %}
+                    Your next check-in is due today.
+                {% elif days_left == 1 %}
+                    Your next check-in is due tomorrow.
+                {% else %}
+                    Your next check-in is due in {{ days_left }} days.
+                {% endif %}
+            </p>
+        {% else %}
+            <h3>A check-in is overdue</h3>
+            <p>
+                {% if days_left <= -1 %}
+                    Your check-in was due {{ -days_left }} day{{ '' if days_left == -1 else 's' }} ago.
+                {% else %}
+                    Your check-in window has passed.
+                {% endif %}
+                In a real system, your trusted contacts would now be gently asked to look in on you.
+            </p>
+        {% endif %}
+        <form method="POST" action="{{ url_for('life_verification_confirm') }}" class="lv-confirm-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-primary">{{ icon_check(size=15) }} {{ "I'm here — check me in" if is_ok else "I'm here — confirm now" }}</button>
+        </form>
+    </div>
+</section>
+
+<section class="card lv-details">
+    <h3>Your check-in schedule</h3>
+    <dl class="detail-list">
+        <div class="detail-row">
+            <dt>Last check-in</dt>
+            <dd>{{ record.last_verified_at.strftime('%d %b %Y, %I:%M %p') if record.last_verified_at else 'Not yet' }}</dd>
+        </div>
+        <div class="detail-row">
+            <dt>Next check-in due</dt>
+            <dd>{{ icon_clock() }} {{ record.next_verification_due.strftime('%d %b %Y, %I:%M %p') }}</dd>
+        </div>
+        <div class="detail-row">
+            <dt>How often</dt>
+            <dd>Every {{ record.verification_interval_days }} days</dd>
+        </div>
+    </dl>
+</section>
+
+<section class="lv-demo" aria-labelledby="lv-demo-title">
+    <h4 id="lv-demo-title">{{ icon_flask() }} Demo controls</h4>
+    <p class="text-muted">
+        Want to see what an overdue check-in looks like without waiting?
+        This shows the "check-in needed" state on this page only. Nothing else happens.
+    </p>
+    <form method="POST" action="{{ url_for('life_verification_simulate_missed') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-small btn-outline">{{ icon_flask(size=13) }} Simulate a missed check-in</button>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_upload, icon_shield, note_card %}
+{% block title %}Upload Document - Digital Legacy Vault{% endblock %}
+{% block content %}
+<a href="{{ url_for('documents_list') }}" class="back-link">← Back to documents</a>
+<div class="form-card">
+    <div class="form-card-icon">{{ icon_upload(size=20) }}</div>
+    <h2>Upload a document</h2>
+    <p class="text-muted form-card-sub">PDF, JPG, JPEG or PNG — up to {{ max_mb }} MB. Stored privately; only you can see or download it.</p>
+    <form method="POST" enctype="multipart/form-data" id="upload-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label for="file">Choose a file</label>
+            <label class="file-drop" id="file-drop" for="file">
+                <span class="file-drop-icon">{{ icon_upload(size=26) }}</span>
+                <span class="file-drop-title" id="file-drop-title">Click to choose a file</span>
+                <span class="file-drop-hint" id="file-drop-hint">PDF, JPG, JPEG or PNG · max {{ max_mb }} MB</span>
+                <input type="file" id="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required>
+            </label>
+            <span class="form-error" id="file-error" role="alert" hidden></span>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                {% for c in categories %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="description">Note <span class="text-muted">(optional)</span></label>
+            <textarea id="description" name="description" rows="3" placeholder="e.g. Original is in the bank locker"></textarea>
+        </div>
+        {% if not notary.enabled %}
+        <div class="form-group">
+            <label class="check-row" for="seal">
+                <input type="checkbox" id="seal" name="seal">
+                <span class="check-row-text">
+                    <span class="check-row-title">Seal this document <span class="text-muted">(optional)</span></span>
+                    <span class="check-row-hint">Saves a private fingerprint — a short code that changes if even one letter of the file changes — so you'll be told if it is ever altered. <strong>No wallet, no crypto, nothing leaves your vault.</strong></span>
+                </span>
+            </label>
+        </div>
+        {% else %}
+        <div class="form-group">
+            <label class="check-row" for="notarize">
+                <input type="checkbox" id="notarize" name="notarize">
+                <span class="check-row-text">
+                    <span class="check-row-title">Notarize this document <span class="text-muted">(optional)</span></span>
+                    <span class="check-row-hint">Saves a fingerprint — a short code that changes if even one letter of the file changes — so you can prove later that it hasn't been altered. <strong>Only the fingerprint is ever made public. Your file stays private in your vault.</strong></span>
+                </span>
+            </label>
+        </div>
+        {% endif %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="upload-btn">Add to my vault</button>
+            <a href="{{ url_for('documents_list') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+/* Convenience only — the server re-validates type, size and contents. */
+(function () {
+    var MAX_BYTES = {{ max_mb }} * 1024 * 1024;
+    var ALLOWED = ["pdf", "jpg", "jpeg", "png"];
+    var input = document.getElementById("file");
+    var drop = document.getElementById("file-drop");
+    var title = document.getElementById("file-drop-title");
+    var hint = document.getElementById("file-drop-hint");
+    var error = document.getElementById("file-error");
+    var btn = document.getElementById("upload-btn");
+    var form = document.getElementById("upload-form");
+    var defaultTitle = title.textContent, defaultHint = hint.textContent;
+
+    function size(n) {
+        return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+    }
+    function reset() {
+        drop.classList.remove("has-file");
+        title.textContent = defaultTitle; hint.textContent = defaultHint;
+    }
+    function fail(msg) {
+        error.textContent = msg; error.hidden = false;
+        input.value = ""; reset();
+    }
+
+    input.addEventListener("change", function () {
+        error.hidden = true;
+        var f = input.files && input.files[0];
+        if (!f) { reset(); return; }
+        var ext = f.name.indexOf(".") > -1 ? f.name.split(".").pop().toLowerCase() : "";
+        if (ALLOWED.indexOf(ext) === -1) { fail("Only PDF, JPG, JPEG and PNG files can be uploaded."); return; }
+        if (f.size > MAX_BYTES) { fail("That file is " + size(f.size) + " — please choose one under {{ max_mb }} MB."); return; }
+        drop.classList.add("has-file");
+        title.textContent = f.name;
+        hint.textContent = size(f.size) + " · click to choose a different file";
+    });
+
+    form.addEventListener("submit", function () {
+        btn.disabled = true; btn.textContent = "Uploading…";
+    });
+})();
+</script>
+{% endblock %}

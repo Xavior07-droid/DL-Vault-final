@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2F4A3E">
+    <meta name="color-scheme" content="light">
+    <title>{% block title %}Digital Legacy Vault{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    {% from "components.html" import icon_menu, icon_home, icon_box, icon_users, icon_scroll, icon_clipboard_check, icon_file, icon_globe, icon_heart_handshake, icon_pulse, icon_check_square, icon_logout, icon_check, icon_alert, icon_x, icon_shield %}
+
+    {% if current_user %}
+    <header class="navbar">
+        <div class="navbar-row">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <span class="navbar-brand-mark" aria-hidden="true">🔐</span>
+                <span>Digital Legacy Vault</span>
+            </a>
+
+            <button type="button" class="navbar-toggle" id="navToggle" aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
+                {{ icon_menu() }}
+            </button>
+
+            <div class="navbar-user navbar-user-desktop">
+                <span class="navbar-user-name">{{ current_user.full_name }}</span>
+                <form method="POST" action="{{ url_for('logout') }}" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn btn-small btn-outline">{{ icon_logout(size=14) }} Logout</button></form>
+            </div>
+        </div>
+
+        <nav id="navPanel" class="navbar-panel" aria-label="Main navigation">
+            <div class="navbar-links">
+                <a href="{{ url_for('dashboard') }}" class="{{ 'is-active' if request.endpoint == 'dashboard' }}">{{ icon_home() }} Dashboard</a>
+                <a href="{{ url_for('assets_list') }}" class="{{ 'is-active' if request.endpoint == 'assets_list' }}">{{ icon_box() }} Assets</a>
+                <a href="{{ url_for('nominees_list') }}" class="{{ 'is-active' if request.endpoint == 'nominees_list' }}">{{ icon_users() }} Nominees</a>
+                <a href="{{ url_for('will_list') }}" class="{{ 'is-active' if request.endpoint == 'will_list' }}">{{ icon_scroll() }} Will</a>
+                <a href="{{ url_for('will_checker') }}" class="{{ 'is-active' if request.endpoint == 'will_checker' }}">{{ icon_clipboard_check() }} Checker</a>
+                <a href="{{ url_for('documents_list') }}" class="{{ 'is-active' if request.endpoint == 'documents_list' }}">{{ icon_file() }} Documents</a>
+                <a href="{{ url_for('digital_accounts_list') }}" class="{{ 'is-active' if request.endpoint == 'digital_accounts_list' }}">{{ icon_globe() }} Digital Legacy</a>
+                <a href="{{ url_for('trusted_contacts_list') }}" class="{{ 'is-active' if request.endpoint == 'trusted_contacts_list' }}">{{ icon_heart_handshake() }} Trusted Contacts</a>
+                <a href="{{ url_for('life_verification') }}" class="{{ 'is-active' if request.endpoint == 'life_verification' }}">{{ icon_pulse() }} Life Verification</a>
+                <a href="{{ url_for('tasks_list') }}" class="{{ 'is-active' if request.endpoint == 'tasks_list' }}">{{ icon_check_square() }} Tasks</a>
+            </div>
+            <div class="navbar-user navbar-user-mobile">
+                <span class="navbar-user-name">{{ current_user.full_name }}</span>
+                <form method="POST" action="{{ url_for('logout') }}" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn btn-small btn-outline btn-block">{{ icon_logout(size=14) }} Logout</button></form>
+            </div>
+        </nav>
+    </header>
+    {% endif %}
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}" role="status">
+                            <span class="flash-icon" aria-hidden="true">
+                                {%- if category == 'success' -%}{{ icon_check(size=16) }}
+                                {%- elif category == 'danger' -%}{{ icon_x(size=16) }}
+                                {%- elif category == 'warning' -%}{{ icon_alert(size=16) }}
+                                {%- else -%}{{ icon_shield(size=16) }}
+                                {%- endif -%}
+                            </span>
+                            <span class="flash-text">{{ message }}</span>
+                            <button type="button" class="flash-dismiss" aria-label="Dismiss message" onclick="this.closest('.flash').remove()">{{ icon_x(size=13) }}</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if current_user %}
+    <script>
+        (function () {
+            var toggle = document.getElementById('navToggle');
+            var panel = document.getElementById('navPanel');
+            if (!toggle || !panel) return;
+
+            function closeNav() {
+                panel.classList.remove('is-open');
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.setAttribute('aria-label', 'Open menu');
+            }
+            function openNav() {
+                panel.classList.add('is-open');
+                toggle.setAttribute('aria-expanded', 'true');
+                toggle.setAttribute('aria-label', 'Close menu');
+            }
+
+            toggle.addEventListener('click', function () {
+                if (panel.classList.contains('is-open')) { closeNav(); } else { openNav(); }
+            });
+
+            panel.querySelectorAll('a').forEach(function (link) {
+                link.addEventListener('click', closeNav);
+            });
+
+            // Escape closes the menu and hands focus back to the button.
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && panel.classList.contains('is-open')) {
+                    closeNav();
+                    toggle.focus();
+                }
+            });
+
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 860) { closeNav(); }
+            });
+        })();
+    </script>
+    {% endif %}
+</body>
+</html>

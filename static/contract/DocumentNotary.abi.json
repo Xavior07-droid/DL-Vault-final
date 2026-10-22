@@ -1,0 +1,35 @@
+[
+  {
+    "type": "event",
+    "name": "DocumentRegistered",
+    "anonymous": false,
+    "inputs": [
+      { "name": "hash", "type": "bytes32", "indexed": true },
+      { "name": "owner", "type": "address", "indexed": true },
+      { "name": "cid", "type": "string", "indexed": false },
+      { "name": "timestamp", "type": "uint256", "indexed": false }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getRecord",
+    "stateMutability": "view",
+    "inputs": [{ "name": "hash", "type": "bytes32" }],
+    "outputs": [
+      { "name": "exists", "type": "bool" },
+      { "name": "owner", "type": "address" },
+      { "name": "cid", "type": "string" },
+      { "name": "timestamp", "type": "uint256" }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "registerDocument",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "name": "hash", "type": "bytes32" },
+      { "name": "cid", "type": "string" }
+    ],
+    "outputs": []
+  }
+]

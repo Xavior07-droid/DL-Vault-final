@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_list_checks %}
+{% block title %}{{ "Edit" if task else "Add" }} Task - Digital Legacy Vault{% endblock %}
+{% block content %}
+<a href="{{ url_for('tasks_list') }}" class="back-link">← Back to tasks</a>
+<div class="form-card">
+    <div class="form-card-icon">{{ icon_list_checks(size=20) }}</div>
+    <h2>{{ "Edit task" if task else "Add a task" }}</h2>
+    <p class="text-muted form-card-sub">{{ "Update the details below." if task else "One clear job for whoever handles things later. Keep it small and specific." }}</p>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="title">What needs doing?</label>
+            <input type="text" id="title" name="title" maxlength="160" placeholder="e.g. Tell the bank" value="{{ task.title if task else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Details <span class="text-muted">(optional)</span></label>
+            <textarea id="description" name="description" rows="3" placeholder="Who to contact, which documents to bring, anything that will save time.">{{ task.description if task and task.description else '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="status">Where does it stand?</label>
+            <select id="status" name="status">
+                {% for s in statuses %}
+                <option value="{{ s }}" {% if task and task.status == s %}selected{% elif not task and s == "Pending" %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ "Save changes" if task else "Add task" }}</button>
+            <a href="{{ url_for('tasks_list') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

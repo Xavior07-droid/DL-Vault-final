@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "components.html" import empty_state, note_card, icon_plus, icon_shield %}
+{% block title %}Trusted contacts - Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Your trusted contacts</h2>
+        <p class="text-muted page-header-sub">People who can be reached if you miss your check-ins.</p>
+    </div>
+    <a href="{{ url_for('trusted_contact_add') }}" class="btn btn-primary">{{ icon_plus() }} Add contact</a>
+</div>
+
+{{ note_card(
+    "They never get access to your vault",
+    "Trusted contacts can only be contacted as part of the life-verification process, if you miss your check-ins. They can't see your assets, documents, or accounts.",
+    icon_shield(size=18)
+) }}
+
+{% if contacts %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationship</th>
+            <th>How to reach them</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for contact in contacts %}
+        <tr>
+            <td data-label="Name"><span class="cell-primary">{{ contact.name }}</span></td>
+            <td data-label="Relationship"><span class="tag-pill">{{ contact.relationship_ }}</span></td>
+            <td data-label="How to reach them">
+                {% if contact.email or contact.phone %}
+                <div class="contact-channels">
+                    {% if contact.email %}<a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% endif %}
+                    {% if contact.phone %}<a href="tel:{{ contact.phone }}">{{ contact.phone }}</a>{% endif %}
+                </div>
+                {% else %}
+                <span class="text-muted">No contact details yet</span>
+                {% endif %}
+            </td>
+            <td class="actions">
+                <a href="{{ url_for('trusted_contact_edit', contact_id=contact.id) }}" class="btn btn-small btn-outline">Edit</a>
+                <form method="POST" action="{{ url_for('trusted_contact_delete', contact_id=contact.id) }}" class="inline-form" onsubmit="return confirm('Remove this trusted contact? This can\'t be undone.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+{{ empty_state(
+    "Who could we reach out to?",
+    "Add a friend, sibling, or lawyer who could be reached if a check-in is missed — someone who'd know what to do.",
+    url_for('trusted_contact_add'),
+    "Add your first contact"
+) }}
+{% endif %}
+{% endblock %}

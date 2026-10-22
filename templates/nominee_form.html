@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_users %}
+{% block title %}{{ "Edit" if nominee else "Add" }} Nominee - Digital Legacy Vault{% endblock %}
+{% block content %}
+<a href="{{ url_for('nominees_list') }}" class="back-link">← Back to nominees</a>
+<div class="form-card">
+    <div class="form-card-icon">{{ icon_users(size=20) }}</div>
+    <h2>{{ "Edit nominee" if nominee else "Add a nominee" }}</h2>
+    <p class="text-muted form-card-sub">{{ "Update their details below." if nominee else "Someone you trust to carry things forward — family, a close friend, anyone who matters." }}</p>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="name">Nominee name</label>
+            <input type="text" id="name" name="name" value="{{ nominee.name if nominee else '' }}" placeholder="e.g. Alex Chen" required>
+        </div>
+        <div class="form-group">
+            <label for="relationship">Relationship</label>
+            <input type="text" id="relationship" name="relationship" placeholder="e.g. Mother, Father, Brother" value="{{ nominee.relationship_ if nominee else '' }}" required>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ nominee.email if nominee else '' }}" placeholder="Optional">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="text" id="phone" name="phone" value="{{ nominee.phone if nominee else '' }}" placeholder="Optional">
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ "Save changes" if nominee else "Add nominee" }}</button>
+            <a href="{{ url_for('nominees_list') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
