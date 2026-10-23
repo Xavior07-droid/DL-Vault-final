@@ -70,6 +70,19 @@
             </td>
             <td class="actions">
                 <a href="{{ url_for('document_download', document_id=doc.id) }}" class="btn btn-small btn-outline">{{ icon_download() }} Download</a>
+                <button type="button" class="btn btn-small btn-outline btn-inspect"
+                        data-filename="{{ doc.original_filename }}"
+                        data-category="{{ doc.category }}"
+                        data-uploaded="{{ doc.uploaded_at.strftime('%d %b %Y, %H:%M UTC') }}"
+                        data-size="{% if doc.file_size >= 1048576 %}{{ '%.1f'|format(doc.file_size / 1048576) }} MB{% else %}{{ '%.0f'|format((doc.file_size / 1024) if doc.file_size else 0) }} KB{% endif %}"
+                        data-sha="{{ doc.proof.sha256_hash if doc.proof else '' }}"
+                        data-status="{{ doc.proof.status if doc.proof else 'Unsealed' }}"
+                        data-network="{{ doc.proof.network if doc.proof else 'None' }}"
+                        data-tx="{{ doc.proof.tx_hash if doc.proof else '' }}"
+                        data-explorer="{{ notary.explorer }}"
+                        onclick="openTrustInspector(this)">
+                    {{ icon_shield(size=13) }} Inspect
+                </button>
                 {% if doc.proof and notary.enabled %}
                     {% if doc.proof.status in ("PENDING", "FAILED") %}
                     <button type="button" class="btn btn-small btn-primary" data-notarize data-doc-id="{{ doc.id }}">{{ "Try again" if doc.proof.status == "FAILED" else "Notarize" }}</button>
@@ -108,6 +121,102 @@
     "Upload your first document"
 ) }}
 {% endif %}
+<!-- Trust & Provenance Inspector Modal (Part 2 UI Feature 2) -->
+<div id="trustInspectorModal" class="cmd-palette-backdrop" style="display:none;" aria-hidden="true">
+    <div class="cmd-palette trust-modal" role="dialog" aria-modal="true" aria-label="Document details">
+        <div class="trust-modal-header">
+            <div class="trust-modal-title-wrap">
+                <span class="trust-modal-shield">{{ icon_shield(size=20) }}</span>
+                <div>
+                    <h3 id="inspectDocTitle" class="trust-modal-title">Document details</h3>
+                    <p id="inspectDocMeta" class="text-muted text-small">Fingerprint and notarisation record</p>
+                </div>
+            </div>
+            <button type="button" class="flash-dismiss" aria-label="Close inspector" onclick="closeTrustInspector()">✕</button>
+        </div>
+        <div class="trust-modal-body">
+            <div class="trust-section">
+                <label class="trust-label">Fingerprint (SHA-256)</label>
+                <div class="hash-box-wrap">
+                    <code id="inspectDocHash" class="hash-code">—</code>
+                    <button type="button" class="btn btn-small btn-outline btn-copy-hash" id="copyHashBtn" onclick="copyInspectorHash()">Copy</button>
+                </div>
+                <span id="copyHashFeedback" class="copy-feedback" style="display:none;">✓ Copied to clipboard</span>
+            </div>
+
+            <div class="trust-grid-two">
+                <div class="trust-section">
+                    <label class="trust-label">Status</label>
+                    <div id="inspectDocStatus" class="trust-val">—</div>
+                </div>
+                <div class="trust-section">
+                    <label class="trust-label">Where it’s recorded</label>
+                    <div id="inspectDocNetwork" class="trust-val">—</div>
+                </div>
+            </div>
+
+            <div class="trust-section" id="inspectTxSection" style="display:none;">
+                <label class="trust-label">Public record</label>
+                <div class="tx-box">
+                    <a id="inspectTxLink" href="#" target="_blank" rel="noopener noreferrer" class="link-external">
+                        <span id="inspectTxHash">View on PolygonScan</span> ↗
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="trust-modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeTrustInspector()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openTrustInspector(btn) {
+    var modal = document.getElementById('trustInspectorModal');
+    if (!modal) return;
+    document.getElementById('inspectDocTitle').textContent = btn.getAttribute('data-filename') || 'Document';
+    document.getElementById('inspectDocMeta').textContent = (btn.getAttribute('data-category') || 'File') + ' • ' + (btn.getAttribute('data-size') || '') + ' • Added: ' + (btn.getAttribute('data-uploaded') || '');
+    var sha = btn.getAttribute('data-sha') || 'No cryptographic seal saved yet.';
+    document.getElementById('inspectDocHash').textContent = sha;
+    document.getElementById('inspectDocStatus').textContent = btn.getAttribute('data-status') || 'Unsealed';
+    document.getElementById('inspectDocNetwork').textContent = btn.getAttribute('data-network') || 'Local Vault Storage';
+
+    var tx = btn.getAttribute('data-tx');
+    var explorer = btn.getAttribute('data-explorer') || 'https://amoy.polygonscan.com';
+    var txSec = document.getElementById('inspectTxSection');
+    if (tx) {
+        txSec.style.display = 'block';
+        var txLink = document.getElementById('inspectTxLink');
+        txLink.href = explorer + '/tx/' + tx;
+        document.getElementById('inspectTxHash').textContent = tx.substring(0, 24) + '... (' + explorer.replace('https://', '') + ')';
+    } else {
+        txSec.style.display = 'none';
+    }
+
+    document.getElementById('copyHashFeedback').style.display = 'none';
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeTrustInspector() {
+    var modal = document.getElementById('trustInspectorModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+    }
+}
+
+function copyInspectorHash() {
+    var h = document.getElementById('inspectDocHash').textContent;
+    if (!h || h.indexOf(' ') !== -1) return;
+    navigator.clipboard.writeText(h).then(function() {
+        var fb = document.getElementById('copyHashFeedback');
+        fb.style.display = 'inline-block';
+        setTimeout(function() { fb.style.display = 'none'; }, 2500);
+    });
+}
+</script>
+
 {% if notary.enabled and documents %}
 <script src="{{ url_for('static', filename='vendor/ethers.umd.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/notarize.js') }}"></script>

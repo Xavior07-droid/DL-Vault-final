@@ -1,28 +1,111 @@
 {% extends "base.html" %}
-{% block title %}Register - Digital Legacy Vault{% endblock %}
+{% from "components.html" import icon_shield, icon_check, icon_file_text %}
+{% block title %}Create your vault — Digital Legacy Vault{% endblock %}
 {% block content %}
-<div class="auth-card">
-    <h2>Create your vault</h2>
-    <form method="POST" action="{{ url_for('register') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="form-group">
-            <label for="full_name">Full name</label>
-            <input type="text" id="full_name" name="full_name" required>
+<div class="auth-split-container">
+    <div class="auth-brand-panel">
+        <h2 class="brand-panel-title">Make things easier for the people who matter most.</h2>
+        <p class="brand-panel-subtitle">Set up your vault in about a minute. Add as much or as little as you like, and come back any time.</p>
+        <div class="brand-reassurance-list">
+            <div class="reassurance-item">
+                <span class="reassurance-icon">{{ icon_check(size=16) }}</span>
+                <div>
+                    <b>Free to use</b>
+                    <p>No card needed and no subscription.</p>
+                </div>
+            </div>
+            <div class="reassurance-item">
+                <span class="reassurance-icon">{{ icon_shield(size=16) }}</span>
+                <div>
+                    <b>You stay in control</b>
+                    <p>Nothing is shared unless you choose who sees it.</p>
+                </div>
+            </div>
+            <div class="reassurance-item">
+                <span class="reassurance-icon">{{ icon_file_text(size=16) }}</span>
+                <div>
+                    <b>A summary you can print</b>
+                    <p>Export a PDF overview of your vault whenever you like.</p>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
+        <div class="brand-panel-quote">
+            “Getting your affairs in order is a kindness to the people you love.”
         </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
+    </div>
+
+    <div class="auth-form-panel">
+        <div class="auth-card-inner">
+            <div class="auth-card-top">
+                <h1 class="auth-title">Create your vault</h1>
+                <p class="auth-subtitle">It only takes a minute.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="full_name">Full name</label>
+                    <input type="text" id="full_name" name="full_name" placeholder="e.g. Asha Kulkarni" autocomplete="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required oninput="updatePasswordStrength(this.value)">
+                    <div class="password-meter-wrap">
+                        <div class="password-meter-bar" id="pwdMeter"></div>
+                    </div>
+                    <span class="form-hint" id="pwdHint">Use at least 8 characters. A longer phrase is stronger.</span>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Type it once more" autocomplete="new-password" minlength="8" required>
+                </div>
+                <div class="form-group legal-consent-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="terms_consent" id="termsConsent" required>
+                        <span>I agree to the <a href="{{ url_for('terms') }}" target="_blank" rel="noopener">Terms of Service</a> and <a href="{{ url_for('privacy') }}" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-auth-submit">Create my vault</button>
+            </form>
+
+            <p class="auth-switch">
+                Already have a vault? <a href="{{ url_for('login') }}">Log in</a>
+            </p>
         </div>
-        <div class="form-group">
-            <label for="confirm_password">Confirm password</label>
-            <input type="password" id="confirm_password" name="confirm_password" required>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Create my vault</button>
-    </form>
-    <p class="auth-switch">Already have a vault? <a href="{{ url_for('login') }}">Log in</a></p>
+    </div>
 </div>
+
+<script>
+function updatePasswordStrength(val) {
+    var meter = document.getElementById('pwdMeter');
+    var hint = document.getElementById('pwdHint');
+    if (!meter) return;
+    if (!val) {
+        meter.style.width = '0%';
+        meter.style.backgroundColor = 'var(--line)';
+        hint.textContent = 'Use at least 8 characters. A longer phrase is stronger.';
+        return;
+    }
+    var score = 0;
+    if (val.length >= 8) score += 25;
+    if (val.length >= 12) score += 25;
+    if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
+    if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 25;
+    meter.style.width = score + '%';
+    if (score < 50) {
+        meter.style.backgroundColor = 'var(--danger)';
+        hint.textContent = 'Weak. Try a longer password with capitals and numbers.';
+    } else if (score < 75) {
+        meter.style.backgroundColor = 'var(--warning)';
+        hint.textContent = 'Good. Adding a symbol or more length would make it stronger.';
+    } else {
+        meter.style.backgroundColor = 'var(--success)';
+        hint.textContent = 'Strong password.';
+    }
+}
+</script>
 {% endblock %}

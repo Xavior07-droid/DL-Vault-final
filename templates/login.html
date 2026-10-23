@@ -1,20 +1,90 @@
 {% extends "base.html" %}
-{% block title %}Login - Digital Legacy Vault{% endblock %}
+{% from "components.html" import icon_shield, icon_users, icon_file_text %}
+{% block title %}Log in — Digital Legacy Vault{% endblock %}
 {% block content %}
-<div class="auth-card">
-    <h2>Welcome back</h2>
-    <form method="POST" action="{{ url_for('login') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
+<div class="auth-split-container">
+    <div class="auth-brand-panel">
+        <h2 class="brand-panel-title">Everything is where you left it.</h2>
+        <p class="brand-panel-subtitle">Log in to review your assets, documents and wishes, or to check in.</p>
+        <div class="brand-reassurance-list">
+            <div class="reassurance-item">
+                <span class="reassurance-icon">{{ icon_shield(size=16) }}</span>
+                <div>
+                    <b>Private by default</b>
+                    <p>Only you can see your vault until you choose to share.</p>
+                </div>
+            </div>
+            <div class="reassurance-item">
+                <span class="reassurance-icon">{{ icon_users(size=16) }}</span>
+                <div>
+                    <b>Nothing is shared on its own</b>
+                    <p>Your trusted contacts have to confirm before anything is released.</p>
+                </div>
+            </div>
+            <div class="reassurance-item">
+                <span class="reassurance-icon">{{ icon_file_text(size=16) }}</span>
+                <div>
+                    <b>Your papers, together</b>
+                    <p>Wills, deeds and policies, filed and easy to find.</p>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
+        <div class="brand-panel-quote">
+            “Getting your affairs in order is a kindness to the people you love.”
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Log in</button>
-    </form>
-    <p class="auth-switch">New here? <a href="{{ url_for('register') }}">Create your vault</a></p>
+    </div>
+
+    <div class="auth-form-panel">
+        <div class="auth-card-inner">
+            <div class="auth-card-top">
+                <h1 class="auth-title">Welcome back</h1>
+                <p class="auth-subtitle">Log in to your vault.</p>
+            </div>
+
+            <div class="demo-quick-box">
+                <div class="demo-quick-header">
+                    <span class="demo-quick-title">Just looking around?</span>
+                </div>
+                <p class="demo-quick-desc">Open a demo vault filled with sample assets, documents and contacts.</p>
+                <button type="button" class="btn btn-small btn-accent btn-block" id="demoFillBtn" onclick="fillDemoCredentials()">
+                    Open the demo vault
+                </button>
+            </div>
+
+            <div class="auth-divider"><span>or log in with your email</span></div>
+
+            <form method="POST" action="{{ url_for('login') }}" id="loginForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <div class="label-row-split">
+                        <label for="password">Password</label>
+                    </div>
+                    <input type="password" id="password" name="password" placeholder="Your password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-auth-submit">Log in</button>
+            </form>
+
+            <p class="auth-switch">
+                New here? <a href="{{ url_for('register') }}">Create your vault</a>
+            </p>
+        </div>
+    </div>
 </div>
+
+<script>
+function fillDemoCredentials() {
+    document.getElementById('email').value = 'demo@vault.local';
+    document.getElementById('password').value = 'demo1234';
+    document.getElementById('loginForm').submit();
+}
+// Pre-fill the demo account when the page is opened with ?demo=1
+if (window.location.search.indexOf('demo=1') !== -1) {
+    document.getElementById('email').value = 'demo@vault.local';
+    document.getElementById('password').value = 'demo1234';
+}
+</script>
 {% endblock %}

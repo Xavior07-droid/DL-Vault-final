@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "components.html" import empty_state, icon_plus, icon_clipboard_check %}
+{% from "components.html" import empty_state, icon_plus, icon_clipboard_check, icon_file_text %}
 {% block title %}Will Instructions - Digital Legacy Vault{% endblock %}
 {% block content %}
 <div class="page-header">
@@ -8,8 +8,9 @@
         <p class="text-muted page-header-sub">Who should get what, and how — in your own words.</p>
     </div>
     <div class="actions">
+        <a href="{{ url_for('export_dossier_pdf') }}" class="btn btn-primary" title="Export legal will inventory and directives PDF">{{ icon_file_text(size=14) }} Export Dossier (PDF)</a>
         <a href="{{ url_for('will_checker') }}" class="btn btn-outline">{{ icon_clipboard_check(size=14) }} Run checker</a>
-        <a href="{{ url_for('will_add') }}" class="btn btn-primary">{{ icon_plus() }} Add instruction</a>
+        <a href="{{ url_for('will_add') }}" class="btn btn-outline">{{ icon_plus() }} Add instruction</a>
     </div>
 </div>
 

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_alert, icon_shield, icon_check %}
+{% block title %}Acceptable Use Policy — Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="legal-page-container">
+    <div class="legal-header">
+        <div class="legal-kicker">{{ icon_alert(size=14) }} Platform Standards</div>
+        <h1 class="legal-title">Acceptable Use Policy</h1>
+        <p class="legal-meta">Effective Date: January 1, 2024 &bull; Last Revised: October 23, 2026</p>
+    </div>
+
+    <div class="card legal-card">
+        <p class="lead-text">To preserve the integrity, dignity, and legal trust of Digital Legacy Vault, all users must adhere strictly to these acceptable use standards.</p>
+
+        <section class="legal-section">
+            <h2>1. Permitted Uses</h2>
+            <p>Digital Legacy Vault is designed exclusively for:</p>
+            <ul>
+                <li>Legitimate personal and family estate inventory organization.</li>
+                <li>Securely cataloging legally owned real property, bank accounts, insurance policies, and digital services.</li>
+                <li>Documenting testamentary directives and distribution instructions for verified heirs and nominees.</li>
+                <li>Designating trusted contacts to participate in emergency quorum life-verification checks.</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2>2. Strictly Prohibited Uses</h2>
+            <p>You may not under any circumstances utilize DLV to:</p>
+            <ul>
+                <li><strong>Unlawful Assets:</strong> Store records, deeds, or keys concerning illegally acquired property, illicit funds, or instruments related to money laundering or illicit trafficking.</li>
+                <li><strong>Fraud & Impersonation:</strong> Falsely impersonate living or deceased persons, fabricate deceptive estate claims, or upload counterfeit identification papers.</li>
+                <li><strong>Malicious Code:</strong> Attempt to upload executable files, virus payloads, spyware, or corrupted scripts designed to compromise system servers or claimant devices.</li>
+                <li><strong>Authentication Attacks:</strong> Attempt to brute-force passphrases, bypass CSRF tokens, reverse-engineer tokens, or disrupt server availability via automated DDoS attacks.</li>
+                <li><strong>Harassment & Extortion:</strong> Use dead-man directives or beneficiary release portals to transmit defamatory, extortive, threatening, or abusive messages to nominees.</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2>3. Monitoring & Enforcement</h2>
+            <p>Because DLV operates with zero-knowledge encryption, we do not inspect the plaintext content of encrypted notes. However, system security monitoring continuously audits upload file types, suspicious rate-limiting spikes, and anomalous token requests. Violations of this policy will result in immediate termination of the offending account, forfeiture of vault data, and where applicable, referral to relevant law enforcement agencies.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>4. Reporting Violations</h2>
+            <p>If you suspect an account is being used in violation of this policy or in furtherance of fraud, please notify our security team at <a href="mailto:abuse@digitallegacyvault.io">abuse@digitallegacyvault.io</a>.</p>
+        </section>
+    </div>
+</div>
+{% endblock %}

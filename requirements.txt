@@ -4,3 +4,5 @@ Werkzeug==3.0.3
 python-dotenv==1.0.1
 Flask-WTF==1.2.1
 gunicorn==22.0.0
+reportlab>=4.0.0
+qrcode>=7.0

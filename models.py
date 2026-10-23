@@ -48,6 +48,8 @@ class Asset(db.Model):
     reference = db.Column(db.String(120))
     approx_value = db.Column(db.Float, default=0)
     description = db.Column(db.Text)
+    wallet_address = db.Column(db.String(120), nullable=True)
+    last_synced_at = db.Column(db.DateTime, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -69,6 +71,7 @@ class Nominee(db.Model):
     relationship_ = db.Column("relationship", db.String(80), nullable=False)
     email = db.Column(db.String(120))
     phone = db.Column(db.String(30))
+    claim_token = db.Column(db.String(64), unique=True, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -173,6 +176,8 @@ class DigitalAccount(db.Model):
     action = db.Column(db.String(40), nullable=False)  # Preserve / Delete / Transfer / Memorialize
     beneficiary = db.Column(db.String(120))
     instructions = db.Column(db.Text)
+    is_encrypted = db.Column(db.Boolean, default=False)
+    encrypted_notes = db.Column(db.Text, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -187,6 +192,10 @@ class TrustedContact(db.Model):
     relationship_ = db.Column("relationship", db.String(80), nullable=False)
     email = db.Column(db.String(120))
     phone = db.Column(db.String(30))
+    approval_token = db.Column(db.String(64), unique=True, nullable=True)
+    approval_status = db.Column(db.String(20), default="PENDING", nullable=False)  # PENDING / APPROVED / REJECTED
+    approval_notes = db.Column(db.Text, nullable=True)
+    approved_at = db.Column(db.DateTime, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -210,9 +219,13 @@ class LifeVerification(db.Model):
 
     # OK  -> next_verification_due is in the future
     # VERIFICATION_REQUIRED -> user missed the check-in (simulated or real)
+    # VAULT_UNLOCKED -> quorum of trusted contacts confirmed release
     status = db.Column(db.String(30), default="OK", nullable=False)
 
     verification_interval_days = db.Column(db.Integer, default=30, nullable=False)
+    quorum_required = db.Column(db.Integer, default=2, nullable=False)
+    probate_status = db.Column(db.String(30), default="NORMAL", nullable=False)  # NORMAL / PENDING_APPROVAL / UNLOCKED
+    probate_requested_at = db.Column(db.DateTime, nullable=True)
 
     owner = db.relationship("User", backref=db.backref(
         "life_verification", uselist=False, cascade="all, delete-orphan"

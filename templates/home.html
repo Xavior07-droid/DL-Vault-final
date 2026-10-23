@@ -1,12 +1,233 @@
 {% extends "base.html" %}
-{% block title %}Welcome - Digital Legacy Vault{% endblock %}
+{% from "components.html" import icon_box, icon_users, icon_file, icon_globe, icon_heart_handshake, icon_check_square, icon_shield, icon_scroll, icon_clipboard_check, icon_pulse, icon_file_text, icon_sync, icon_search %}
+{% block title %}Digital Legacy Vault — Your legacy, in order{% endblock %}
 {% block content %}
-<div class="hero">
-    <h1>Digital Legacy Vault</h1>
-    <p>A calm, secure place to gather what matters — so the people you love are never left searching.</p>
-    <div class="hero-actions">
-        <a href="{{ url_for('login') }}" class="btn btn-primary">Log in</a>
-        <a href="{{ url_for('register') }}" class="btn btn-outline">Create your vault</a>
+<script>document.documentElement.setAttribute('data-theme','dark');</script>
+<style>.nav-theme-btn{display:none}</style>
+{% set row1 = [(icon_box(size=38),"Assets","What you own"),(icon_users(size=38),"Nominees","Who receives it"),(icon_scroll(size=38),"Will instructions","Your wishes, in words"),(icon_clipboard_check(size=38),"Will checker","Spot what’s missing"),(icon_file(size=38),"Documents","Wills, deeds, policies"),(icon_shield(size=38),"Fingerprints","Know if a file changed"),(icon_globe(size=38),"Digital accounts","Email, social, subscriptions"),(icon_heart_handshake(size=38),"Trusted contacts","People who confirm"),(icon_pulse(size=38),"Check-ins","Stay locked while you’re well"),(icon_check_square(size=38),"Tasks","A to-do list for family"),(icon_file_text(size=38),"PDF summary","Print it any time")] %}
+{% set row2 = [(icon_users(size=38),"Private links","Each nominee sees their share"),(icon_clipboard_check(size=38),"Readiness score","See what’s still missing"),(icon_shield(size=38),"Locked notes","Encrypted in your browser"),(icon_box(size=38),"Asset values","One total, at a glance"),(icon_search(size=38),"Quick search","Ctrl K finds anything"),(icon_pulse(size=38),"Life status","Always up to date"),(icon_sync(size=38),"Wallet sync","Refresh linked values"),(icon_users(size=38),"Demo vault","Try it with sample data"),(icon_file(size=38),"Nominee page","A calm, simple view"),(icon_check_square(size=38),"Task progress","Know what’s done")] %}
+{% set hues = [285, 300, 320, 20, 270] %}
+{% set steps = [
+  {"cat":"Step one","name":"Add what you have","big":"Assets","rows":["Family home","Fixed deposit","Life insurance"],"text":"Start with the things your family would struggle to find: accounts, property, policies and the papers that go with them."},
+  {"cat":"Step two","name":"Choose who should know","big":"Nominees","rows":["Meera, spouse","Arjun, son","Rohan, trusted contact"],"text":"Name your nominees and trusted contacts. Each nominee gets a private link that shows only what you’ve shared with them."},
+  {"cat":"Step three","name":"Check in now and then","big":"Check-in","rows":["Last check-in: today","Next due: in 30 days","Contacts needed: 2 of 3"],"text":"A quick “I’m here” keeps everything locked. If check-ins stop, your trusted contacts are asked to look in before anything is shared."}
+] %}
+{% set svc = [
+  ("Assets","Property, bank accounts, insurance, vehicles and investments. Add a rough value and see everything at a glance on your dashboard."),
+  ("Nominees and wishes","Link people to the right assets and explain your wishes in plain language. The will checker points out anything you’ve left unassigned."),
+  ("Documents","Upload your will, deeds and policies. Seal a document to save a fingerprint, so you can tell later whether the file has changed."),
+  ("Digital accounts","For each email, social media or subscription account, choose whether it should be closed, remembered, handed on or deleted. Private notes can be locked with a passphrase only you know."),
+  ("Trusted contacts","Choose a few trusted people. Nothing reaches your nominees until enough of them agree that the time has come.")
+] %}
+
+<div class="nx">
+<section class="nx-hero nx-inner" aria-labelledby="hero-title">
+    <h1 id="hero-title" class="nx-title nx-in" style="--d:.15s;--y:40px">Your legacy,<br>in order.</h1>
+    <div class="nx-vault">
+        <div class="nx-in" style="--d:.6s;--y:30px">
+            <div id="vaultMagnet" style="will-change:transform">
+                <svg viewBox="0 0 400 400" role="img" aria-label="A vault door">
+                    <defs>
+                        <linearGradient id="vg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EAF1F5"/><stop offset=".5" stop-color="#9DAAB5"/><stop offset="1" stop-color="#4A515B"/></linearGradient>
+                        <radialGradient id="vf" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#2A2A33"/><stop offset="1" stop-color="#0F0F13"/></radialGradient>
+                    </defs>
+                    <circle cx="200" cy="200" r="188" fill="url(#vf)" stroke="url(#vg)" stroke-width="10"/>
+                    <circle cx="200" cy="200" r="150" fill="none" stroke="url(#vg)" stroke-width="3" opacity=".6"/>
+                    <g stroke="url(#vg)" stroke-width="4" stroke-linecap="round">{% for a in range(0,360,30) %}<line x1="200" y1="62" x2="200" y2="82" transform="rotate({{ a }} 200 200)"/>{% endfor %}</g>
+                    <g transform="translate(200 200)"><circle r="62" fill="#14141A" stroke="url(#vg)" stroke-width="6"/>
+                        <g stroke="url(#vg)" stroke-width="9" stroke-linecap="round">{% for a in (0,60,120) %}<line x1="-92" y1="0" x2="92" y2="0" transform="rotate({{ a }})"/>{% endfor %}</g>
+                        <circle r="22" fill="url(#vg)"/><circle r="8" fill="#0C0C0C"/></g>
+                </svg>
+            </div>
+        </div>
     </div>
+    <div class="nx-bottom">
+        <p class="nx-lead nx-in" style="--d:.35s;--y:20px">a private place to keep your assets, documents and wishes, so the people you love know where to look</p>
+        <div class="nx-cta-col nx-in" style="--d:.5s;--y:20px">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-hero">Create your vault</a>
+            <small><a href="{{ url_for('login') }}?demo=1">or look around the demo</a></small>
+        </div>
+    </div>
+</section>
+
+<section class="nx-marquee" aria-hidden="true">
+    <div class="nx-row">{% for k in range(3) %}{% for ic, t, s in row1 %}<div class="nx-tile" style="--h:{{ hues[loop.index0 % 5] }}">{{ ic }}<div><b>{{ t }}</b><span>{{ s }}</span></div></div>{% endfor %}{% endfor %}</div>
+    <div class="nx-row">{% for k in range(3) %}{% for ic, t, s in row2 %}<div class="nx-tile" style="--h:{{ hues[(loop.index0 + 2) % 5] }}">{{ ic }}<div><b>{{ t }}</b><span>{{ s }}</span></div></div>{% endfor %}{% endfor %}</div>
+</section>
+
+<section id="about" class="nx-about">
+    <span class="nx-orb o1">{{ icon_globe(size=60) }}</span>
+    <span class="nx-orb o2">{{ icon_file(size=60) }}</span>
+    <span class="nx-orb o3">{{ icon_box(size=60) }}</span>
+    <span class="nx-orb o4">{{ icon_heart_handshake(size=60) }}</span>
+    <h2 class="nx-big" style="position:relative;z-index:1">Why it exists</h2>
+    <p class="nx-copy" data-split style="position:relative;z-index:1">When someone passes away, families often spend months hunting for accounts, policies and papers. Digital Legacy Vault keeps all of it in one private place, written in your own words, and shares it only when the people you trust confirm the time has come.</p>
+    <a href="{{ url_for('register') }}" class="btn btn-primary btn-hero" style="position:relative;z-index:1">Create your vault</a>
+</section>
+
+<section id="what-you-can-do" class="nx-services">
+    <h2 class="nx-big">What’s inside</h2>
+    <div class="nx-list">
+        {% for t, d in svc %}<div class="nx-svc"><span class="nx-num">0{{ loop.index }}</span><div><h3>{{ t }}</h3><p>{{ d }}</p></div></div>{% endfor %}
+    </div>
+</section>
+
+<section id="how-it-works" class="nx-stackwrap">
+    <h2 class="nx-big">How it works</h2>
+    <div class="nx-stack">
+        {% for s in steps %}
+        <div class="nx-slot"><div class="nx-sticky"><div class="nx-card" style="top:{{ loop.index0 * 28 }}px">
+            <div class="nx-card-head">
+                <div class="nx-card-title"><span class="nx-num">0{{ loop.index }}</span><div><small>{{ s.cat }}</small><h3>{{ s.name }}</h3></div></div>
+                <a class="nx-ghost" href="{{ url_for('login') }}?demo=1">Try the demo</a>
+            </div>
+            <div class="nx-card-grid">
+                <div class="nx-col1">
+                    <div class="nx-panel nx-p1"><small>Example</small><span class="nx-word">{{ s.big }}</span></div>
+                    <div class="nx-panel nx-p2"><ul>{% for r in s.rows %}<li>{{ r }}</li>{% endfor %}</ul></div>
+                </div>
+                <div class="nx-col2"><div class="nx-panel"><p>{{ s.text }}</p></div></div>
+            </div>
+        </div></div></div>
+        {% endfor %}
+    </div>
+</section>
+
+<div class="nx-after nx-inner">
+<section id="safety" class="landing-section">
+    <div class="safety-grid">
+        <div>
+            <h2 class="section-title">How your vault is looked after</h2>
+            <p class="section-subtitle" style="margin-bottom: 28px;">The things we do, in plain terms.</p>
+            <ul class="safety-list">
+                <li>{{ icon_shield(size=20) }}<div><b>Your password is never stored as you typed it</b><span>We keep a scrambled version, so even we can’t read it.</span></div></li>
+                <li>{{ icon_shield(size=20) }}<div><b>Nothing is shared automatically</b><span>A missed check-in only raises a flag. Your nominees get access only after enough trusted contacts confirm.</span></div></li>
+                <li>{{ icon_shield(size=20) }}<div><b>Nominees see only their share</b><span>Each person opens a private link and sees just the assets and papers you’ve assigned to them.</span></div></li>
+                <li>{{ icon_shield(size=20) }}<div><b>Sensitive notes can be locked in your browser</b><span>For digital accounts, you can encrypt notes with a passphrase that never leaves your device.</span></div></li>
+                <li>{{ icon_shield(size=20) }}<div><b>Forms are protected against forged requests</b><span>Every action that changes your vault carries a security token.</span></div></li>
+            </ul>
+        </div>
+        <aside class="honest-box">
+            <h3>What this is, and isn’t</h3>
+            <p>Digital Legacy Vault helps you organise information and share it with the right people. It isn’t a law firm, and it doesn’t make a will legally valid. Please have a lawyer look over your will.</p>
+            <p>Uploaded documents are stored on our server and protected by your login. They are not locked with a passphrase only you hold, so keep the most sensitive details in encrypted notes instead.</p>
+            <p>If you choose to notarise a document, only its fingerprint is recorded on a public test network. The file itself never leaves the vault.</p>
+        </aside>
+    </div>
+</section>
+
+<section id="when-the-time-comes" class="landing-section">
+    <div class="section-header-center">
+        <h2 class="section-title">What happens when the time comes</h2>
+        <p class="section-subtitle">Four careful steps, so nothing is ever shared by accident.</p>
+    </div>
+    <ol class="timeline">
+        <li><b>Check-ins stop.</b><span>Your vault is flagged. Nothing is shared yet.</span></li>
+        <li><b>Your trusted contacts are asked.</b><span>Each one gets a private page asking whether the time has come.</span></li>
+        <li><b>Enough of them agree.</b><span>You choose how many. Only then does the vault unlock.</span></li>
+        <li><b>Your nominees see their share.</b><span>Each opens their own link and sees only what you set aside for them.</span></li>
+    </ol>
+</section>
+
+<section id="faq" class="landing-section">
+    <div class="section-header-center">
+        <h2 class="section-title">Questions people ask</h2>
+    </div>
+    <div class="faq">
+        <details>
+            <summary>Is it free?</summary>
+            <p>Yes. Creating and using a vault costs nothing.</p>
+        </details>
+        <details>
+            <summary>Does this replace a will?</summary>
+            <p>No. It sits alongside your will. It records where things are and what you’d like to happen, so your family isn’t left searching. A lawyer can help you make the will itself legally sound.</p>
+        </details>
+        <details>
+            <summary>What happens if I forget to check in?</summary>
+            <p>Nothing is released. Your vault is flagged and your trusted contacts are asked to review. You can confirm you’re well at any time to reset it.</p>
+        </details>
+        <details>
+            <summary>Who can see what I add?</summary>
+            <p>Only you, by default. Nominees see what you assign to them once the vault is unlocked. Trusted contacts see only a short review page, not your records.</p>
+        </details>
+        <details>
+            <summary>Can I try it before adding anything real?</summary>
+            <p>Yes. The demo vault is filled with sample assets, documents and contacts so you can explore every page.</p>
+        </details>
+    </div>
+</section>
+
+<section class="cta-band" aria-labelledby="cta-title">
+    <div>
+        <h2 id="cta-title">Start with one thing that matters.</h2>
+        <p>Add a single asset today. You can build the rest whenever you’re ready.</p>
+    </div>
+    <a href="{{ url_for('register') }}" class="btn btn-hero">Create your vault</a>
+</section>
+
+
 </div>
+</div>
+
+<script>
+(function () {
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var sec = document.querySelector('.nx-marquee'), rows = sec.querySelectorAll('.nx-row');
+    rows.forEach(function (r) { r.style.marginLeft = -(r.children.length / 3) * 432 + 'px'; });
+
+    var copy = document.querySelector('[data-split]'), chars = [];
+    if (copy) {
+        var t = copy.textContent.trim(); copy.textContent = '';
+        t.split(' ').forEach(function (w, wi, a) {
+            var s = document.createElement('span'); s.className = 'nx-w';
+            Array.from(w).forEach(function (c) { var x = document.createElement('span'); x.textContent = c; x.style.opacity = reduce ? 1 : 0.2; s.appendChild(x); chars.push(x); });
+            copy.appendChild(s);
+            if (wi < a.length - 1) copy.appendChild(document.createTextNode(' '));
+        });
+    }
+
+    var wrap = document.querySelector('.nx-stack'), cards = Array.prototype.slice.call(wrap.querySelectorAll('.nx-card'));
+    var clamp = function (v) { return Math.min(1, Math.max(0, v)); }, ticking = false;
+    function tick() {
+        var h = window.innerHeight, y = window.scrollY;
+        if (!reduce) {
+            var o = (y - (sec.getBoundingClientRect().top + y) + h) * 0.3;
+            rows[0].style.transform = 'translateX(' + (o - 200) + 'px)';
+            rows[1].style.transform = 'translateX(' + (-(o - 200)) + 'px)';
+            if (copy) {
+                var r = copy.getBoundingClientRect(), p = clamp((0.8 * h - r.top) / (0.6 * h + r.height)), n = chars.length;
+                chars.forEach(function (c, i) { c.style.opacity = (0.2 + 0.8 * clamp(p * n - i)).toFixed(3); });
+            }
+        }
+        var wr = wrap.getBoundingClientRect(), pr = clamp(-wr.top / Math.max(1, wr.height - h)), m = cards.length;
+        cards.forEach(function (c, i) {
+            var tgt = 1 - (m - 1 - i) * 0.03, k = clamp((pr - i / m) / (1 - i / m));
+            c.style.transform = 'scale(' + (1 + (tgt - 1) * k).toFixed(4) + ')';
+        });
+        ticking = false;
+    }
+    function req() { if (!ticking) { ticking = true; requestAnimationFrame(tick); } }
+    window.addEventListener('scroll', req, { passive: true });
+    window.addEventListener('resize', req);
+    tick();
+
+    var items = document.querySelectorAll('.nx-svc');
+    if (!reduce && 'IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -5% 0px' });
+        items.forEach(function (el, i) { el.classList.add('reveal'); el.style.transitionDelay = (i * 0.1) + 's'; io.observe(el); });
+        document.documentElement.classList.add('js-reveal');
+    }
+
+    var m = document.getElementById('vaultMagnet'), box = document.querySelector('.nx-vault');
+    if (m && !reduce) {
+        window.addEventListener('mousemove', function (e) {
+            var r = box.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, pad = 150;
+            if (Math.abs(cx - e.clientX) < r.width / 2 + pad && Math.abs(cy - e.clientY) < r.height / 2 + pad) {
+                m.style.transition = 'transform .3s ease-out';
+                m.style.transform = 'translate3d(' + (e.clientX - cx) / 3 + 'px,' + (e.clientY - cy) / 3 + 'px,0)';
+            } else { m.style.transition = 'transform .6s ease-in-out'; m.style.transform = 'translate3d(0,0,0)'; }
+        });
+    }
+})();
+</script>
 {% endblock %}

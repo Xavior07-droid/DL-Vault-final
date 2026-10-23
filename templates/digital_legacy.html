@@ -29,7 +29,20 @@
             <td data-label="Account">{{ account.account_identifier }}</td>
             <td data-label="What should happen">{{ account_action(account.action) }}</td>
             <td data-label="Beneficiary">{{ account.beneficiary or "—" }}</td>
-            <td data-label="Instructions">{{ account.instructions or "—" }}</td>
+            <td data-label="Instructions">
+                {% if account.is_encrypted %}
+                    <span class="badge badge-action">Locked with a passphrase</span>
+                    <div id="dec-text-{{ account.id }}" style="margin-top: 4px; font-size: 13px;">{{ account.instructions }}</div>
+                    {% if account.encrypted_notes %}
+                    <button type="button" class="btn btn-small btn-outline" style="margin-top: 6px; padding: 2px 8px; font-size: 11px;"
+                            data-enc="{{ account.encrypted_notes }}" data-id="{{ account.id }}" onclick="decryptAccountNotes(this)">
+                        Unlock notes
+                    </button>
+                    {% endif %}
+                {% else %}
+                    {{ account.instructions or "—" }}
+                {% endif %}
+            </td>
             <td class="actions">
                 <a href="{{ url_for('digital_account_edit', account_id=account.id) }}" class="btn btn-small btn-outline">Edit</a>
                 <form method="POST" action="{{ url_for('digital_account_delete', account_id=account.id) }}" class="inline-form" onsubmit="return confirm('Remove this account from your list? This can\'t be undone.');">
@@ -49,4 +62,52 @@
     "Add your first account"
 ) }}
 {% endif %}
+
+<script>
+async function decryptAccountNotes(btn) {
+    var pass = prompt("Enter your Master Encryption Passphrase to decrypt this record in your browser:");
+    if (!pass) return;
+    var encPayload = btn.getAttribute('data-enc');
+    var id = btn.getAttribute('data-id');
+    var target = document.getElementById('dec-text-' + id);
+
+    try {
+        var plain = await decryptWithPassphrase(encPayload, pass);
+        target.innerHTML = '<span style="color: var(--primary); font-weight: 500;">' + escapeHtml(plain) + '</span>';
+        btn.remove();
+    } catch (err) {
+        alert("Decryption failed. Incorrect passphrase or corrupted payload.");
+    }
+}
+
+async function decryptWithPassphrase(payload, passphrase) {
+    var parts = payload.split(":");
+    if (parts.length !== 4 || parts[0] !== "v1") throw new Error("Invalid encrypted format");
+    function unb64(str) {
+        var bin = atob(str);
+        var bytes = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) { bytes[i] = bin.charCodeAt(i); }
+        return bytes;
+    }
+    var salt = unb64(parts[1]);
+    var iv = unb64(parts[2]);
+    var ciphertext = unb64(parts[3]);
+    var enc = new TextEncoder();
+    var keyMaterial = await window.crypto.subtle.importKey(
+        "raw", enc.encode(passphrase), "PBKDF2", false, ["deriveKey"]
+    );
+    var key = await window.crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+        keyMaterial, { name: "AES-GCM", length: 256 }, false, ["decrypt"]
+    );
+    var decrypted = await window.crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: iv }, key, ciphertext
+    );
+    return new TextDecoder().decode(decrypted);
+}
+
+function escapeHtml(str) {
+    return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+</script>
 {% endblock %}

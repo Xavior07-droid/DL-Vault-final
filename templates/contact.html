@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_shield, icon_check, icon_alert, icon_scroll, icon_users, icon_heart_handshake %}
+{% block title %}Contact Us — Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="legal-page-container">
+    <div class="legal-header">
+        
+        <h1 class="legal-title">Get in touch</h1>
+        <p class="legal-meta">Questions, feedback, or something not working? Write to us.</p>
+    </div>
+
+    <div class="contact-channels-grid">
+        <div class="card contact-channel-card">
+            <div class="contact-channel-icon">{{ icon_scroll(size=20) }}</div>
+            <h3>Legal and privacy</h3>
+            <p>Questions about the terms, your privacy, or a legal request.</p>
+            <a href="mailto:legal@digitallegacyvault.io" class="contact-link">legal@digitallegacyvault.io &rarr;</a>
+        </div>
+
+        <div class="card contact-channel-card">
+            <div class="contact-channel-icon">{{ icon_shield(size=20) }}</div>
+            <h3>Security</h3>
+            <p>Found a vulnerability or have a security concern? Tell us here.</p>
+            <a href="mailto:security@digitallegacyvault.io" class="contact-link">security@digitallegacyvault.io &rarr;</a>
+        </div>
+
+        <div class="card contact-channel-card">
+            <div class="contact-channel-icon">{{ icon_heart_handshake(size=20) }}</div>
+            <h3>Help with your vault</h3>
+            <p>Help with documents, nominees, or exporting your summary.</p>
+            <a href="mailto:support@digitallegacyvault.io" class="contact-link">support@digitallegacyvault.io &rarr;</a>
+        </div>
+    </div>
+
+    <div class="card contact-form-card">
+        <div class="contact-form-header">
+            <h2>Send us a message</h2>
+            <p class="text-muted">Fill out the form below. We typically respond within 2 to 3 business days.</p>
+        </div>
+
+        <div class="contact-warning-note">
+            {{ icon_shield(size=16) }}
+            <span><b>Please don’t send</b> your password, recovery keys, or the contents of your documents through this form or by email.</span>
+        </div>
+
+        <form method="POST" action="{{ url_for('contact') }}" class="contact-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">Your name</label>
+                    <input type="text" id="name" name="name" placeholder="e.g. Eleanor Vance" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="you@domain.com" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="subject">What is this about?</label>
+                <select id="subject" name="subject" required>
+                    <option value="General Inquiry">A general question</option>
+                    <option value="Legal & Privacy">Legal or privacy</option>
+                    <option value="Security Disclosure">A security concern</option>
+                    <option value="Partnership">A partnership</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="message">Your message</label>
+                <textarea id="message" name="message" rows="5" placeholder="How can we help?" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-hero">Send message</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

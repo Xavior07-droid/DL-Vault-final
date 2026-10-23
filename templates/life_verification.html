@@ -67,7 +67,86 @@
             <dt>How often</dt>
             <dd>Every {{ record.verification_interval_days }} days</dd>
         </div>
+        <div class="detail-row">
+            <dt>Confirmations needed</dt>
+            <dd>{{ record.quorum_required }} of {{ contacts|length }} trusted contacts must approve</dd>
+        </div>
     </dl>
+</section>
+
+<!-- Multi-Party Quorum Section (Feature 2) -->
+<section class="card quorum-card">
+    <div class="quorum-header-row">
+        <div>
+            <h3>Trusted contact confirmations</h3>
+            <p class="text-muted">
+                To prevent anything being released by mistake, several trusted contacts must each confirm.
+                Current approvals: <b>{{ approved_count }} of {{ record.quorum_required }}</b> required.
+            </p>
+        </div>
+        <div>
+            <form method="POST" action="{{ url_for('life_verification_quorum_settings') }}" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label for="quorum_required" class="text-small text-muted" style="margin-right: 6px;">Confirmations needed:</label>
+                <input type="number" id="quorum_required" name="quorum_required" value="{{ record.quorum_required }}" min="1" max="{{ contacts|length if contacts else 10 }}" style="width: 55px; padding: 4px; display: inline-block;">
+                <button type="submit" class="btn btn-small btn-outline">Save</button>
+            </form>
+        </div>
+    </div>
+
+    {% if contacts %}
+    <table class="data-table" style="margin-top: 14px;">
+        <thead>
+            <tr>
+                <th>Trusted contact</th>
+                <th>Relationship</th>
+                <th>Decision</th>
+                <th>Review page</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in contacts %}
+            <tr>
+                <td data-label="Contact"><b>{{ c.name }}</b></td>
+                <td data-label="Relationship"><span class="tag-pill">{{ c.relationship_ }}</span></td>
+                <td data-label="Status">
+                    {% if c.approval_status == "APPROVED" %}
+                    <span class="badge badge-pass">{{ icon_check(size=12) }} Approved</span>
+                    {% elif c.approval_status == "REJECTED" %}
+                    <span class="badge badge-danger">{{ icon_alert(size=12) }} Rejected</span>
+                    {% else %}
+                    <span class="badge badge-action">Waiting</span>
+                    {% endif %}
+                </td>
+                <td data-label="Action">
+                    <a href="{{ url_for('trusted_contact_review', token=c.approval_token) }}" class="btn btn-small btn-outline" target="_blank" title="Simulate this trusted contact's secret review link">
+                        Open review page ↗
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted" style="margin-top: 10px;">
+        You haven't designated any trusted contacts yet. <a href="{{ url_for('trusted_contact_add') }}">Add trusted contacts</a> so there’s someone to confirm on your behalf.
+    </p>
+    {% endif %}
+
+    <div class="quorum-actions-row" style="margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <form method="POST" action="{{ url_for('life_verification_initiate_probate') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-small btn-accent" onclick="return confirm('Pretend a check-in was missed and ask your trusted contacts to review?');">
+                {{ icon_flask(size=13) }} Ask my contacts to review
+            </button>
+        </form>
+        <form method="POST" action="{{ url_for('life_verification_reset_quorum') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-small btn-outline">
+                I’m fine — reset everything
+            </button>
+        </form>
+    </div>
 </section>
 
 <section class="lv-demo" aria-labelledby="lv-demo-title">

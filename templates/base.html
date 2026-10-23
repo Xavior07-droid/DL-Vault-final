@@ -3,57 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#2F4A3E">
-    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#0C0C0C">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="A private place to keep track of your assets, documents and wishes, so the people you love know where to look.">
     <title>{% block title %}Digital Legacy Vault{% endblock %}</title>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('dl_vault_theme');
+            if (theme !== 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230C0C0C'/%3E%3Cpath d='M9 24V14a7 7 0 0 1 14 0v10z' fill='none' stroke='white' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2' fill='white'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-    {% from "components.html" import icon_menu, icon_home, icon_box, icon_users, icon_scroll, icon_clipboard_check, icon_file, icon_globe, icon_heart_handshake, icon_pulse, icon_check_square, icon_logout, icon_check, icon_alert, icon_x, icon_shield %}
+    {% from "components.html" import icon_menu, icon_home, icon_box, icon_users, icon_scroll, icon_clipboard_check, icon_file, icon_globe, icon_heart_handshake, icon_pulse, icon_check_square, icon_logout, icon_check, icon_alert, icon_x, icon_shield, icon_search, icon_sun, icon_moon, icon_copy, icon_sync, icon_file_text %}
 
-    {% if current_user %}
-    <header class="navbar">
-        <div class="navbar-row">
-            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
-                <span class="navbar-brand-mark" aria-hidden="true">🔐</span>
-                <span>Digital Legacy Vault</span>
-            </a>
+    {% macro logo_mark() -%}
+    <span class="brand-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V11a7 7 0 0 1 14 0v10z"/><circle cx="12" cy="13" r="1.6" fill="currentColor" stroke="none"/></svg>
+    </span>
+    {%- endmacro %}
 
-            <button type="button" class="navbar-toggle" id="navToggle" aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
-                {{ icon_menu() }}
-            </button>
-
-            <div class="navbar-user navbar-user-desktop">
-                <span class="navbar-user-name">{{ current_user.full_name }}</span>
-                <form method="POST" action="{{ url_for('logout') }}" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn btn-small btn-outline">{{ icon_logout(size=14) }} Logout</button></form>
-            </div>
-        </div>
-
-        <nav id="navPanel" class="navbar-panel" aria-label="Main navigation">
-            <div class="navbar-links">
-                <a href="{{ url_for('dashboard') }}" class="{{ 'is-active' if request.endpoint == 'dashboard' }}">{{ icon_home() }} Dashboard</a>
-                <a href="{{ url_for('assets_list') }}" class="{{ 'is-active' if request.endpoint == 'assets_list' }}">{{ icon_box() }} Assets</a>
-                <a href="{{ url_for('nominees_list') }}" class="{{ 'is-active' if request.endpoint == 'nominees_list' }}">{{ icon_users() }} Nominees</a>
-                <a href="{{ url_for('will_list') }}" class="{{ 'is-active' if request.endpoint == 'will_list' }}">{{ icon_scroll() }} Will</a>
-                <a href="{{ url_for('will_checker') }}" class="{{ 'is-active' if request.endpoint == 'will_checker' }}">{{ icon_clipboard_check() }} Checker</a>
-                <a href="{{ url_for('documents_list') }}" class="{{ 'is-active' if request.endpoint == 'documents_list' }}">{{ icon_file() }} Documents</a>
-                <a href="{{ url_for('digital_accounts_list') }}" class="{{ 'is-active' if request.endpoint == 'digital_accounts_list' }}">{{ icon_globe() }} Digital Legacy</a>
-                <a href="{{ url_for('trusted_contacts_list') }}" class="{{ 'is-active' if request.endpoint == 'trusted_contacts_list' }}">{{ icon_heart_handshake() }} Trusted Contacts</a>
-                <a href="{{ url_for('life_verification') }}" class="{{ 'is-active' if request.endpoint == 'life_verification' }}">{{ icon_pulse() }} Life Verification</a>
-                <a href="{{ url_for('tasks_list') }}" class="{{ 'is-active' if request.endpoint == 'tasks_list' }}">{{ icon_check_square() }} Tasks</a>
-            </div>
-            <div class="navbar-user navbar-user-mobile">
-                <span class="navbar-user-name">{{ current_user.full_name }}</span>
-                <form method="POST" action="{{ url_for('logout') }}" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn btn-small btn-outline btn-block">{{ icon_logout(size=14) }} Logout</button></form>
-            </div>
-        </nav>
-    </header>
-    {% endif %}
-
-    <main class="container">
+    {% macro flashes() -%}
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="flash-container">
@@ -73,49 +50,319 @@
                 </div>
             {% endif %}
         {% endwith %}
+    {%- endmacro %}
 
-        {% block content %}{% endblock %}
-    </main>
+    {% macro site_footer() -%}
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div class="footer-brand-title">Digital Legacy Vault</div>
+                <div class="footer-brand-sub">A calm, private place to organise what matters, so the people you love know where to look.</div>
+            </div>
+            <nav class="footer-legal-links" aria-label="Legal and support">
+                <a href="{{ url_for('terms') }}">Terms</a>
+                <a href="{{ url_for('privacy') }}">Privacy</a>
+                <a href="{{ url_for('acceptable_use') }}">Acceptable use</a>
+                <a href="{{ url_for('contact') }}">Contact</a>
+            </nav>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 Digital Legacy Vault</span>
+            <span>A planning tool, not legal advice. Please speak to a lawyer about your will.</span>
+        </div>
+    </footer>
+    {%- endmacro %}
 
     {% if current_user %}
+    <div class="app-shell">
+        <aside id="navPanel" class="sidebar navbar-panel" aria-label="Main navigation">
+            <a class="brand" href="{{ url_for('dashboard') }}">
+                {{ logo_mark() }}
+                <span class="brand-text-col">
+                    <span class="brand-name">Digital Legacy Vault</span>
+                    <span class="brand-tagline">Your private estate vault</span>
+                </span>
+            </a>
+
+            <nav class="navbar-links">
+                <a href="{{ url_for('dashboard') }}" class="{{ 'is-active' if request.endpoint == 'dashboard' }}">{{ icon_home() }} Dashboard</a>
+
+                <div class="nav-group-label">Your estate</div>
+                <a href="{{ url_for('assets_list') }}" class="{{ 'is-active' if request.endpoint in ('assets_list', 'asset_add', 'asset_edit', 'assign_nominee') }}">{{ icon_box() }} Assets</a>
+                <a href="{{ url_for('nominees_list') }}" class="{{ 'is-active' if request.endpoint in ('nominees_list', 'nominee_add', 'nominee_edit') }}">{{ icon_users() }} Nominees</a>
+                <a href="{{ url_for('will_list') }}" class="{{ 'is-active' if request.endpoint in ('will_list', 'will_add', 'will_edit') }}">{{ icon_scroll() }} Will instructions</a>
+                <a href="{{ url_for('will_checker') }}" class="{{ 'is-active' if request.endpoint == 'will_checker' }}">{{ icon_clipboard_check() }} Will checker</a>
+                <a href="{{ url_for('documents_list') }}" class="{{ 'is-active' if request.endpoint in ('documents_list', 'document_upload') }}">{{ icon_file() }} Documents</a>
+
+                <div class="nav-group-label">People &amp; accounts</div>
+                <a href="{{ url_for('digital_accounts_list') }}" class="{{ 'is-active' if request.endpoint in ('digital_accounts_list', 'digital_account_add', 'digital_account_edit') }}">{{ icon_globe() }} Digital accounts</a>
+                <a href="{{ url_for('trusted_contacts_list') }}" class="{{ 'is-active' if request.endpoint in ('trusted_contacts_list', 'trusted_contact_add', 'trusted_contact_edit') }}">{{ icon_heart_handshake() }} Trusted contacts</a>
+                <a href="{{ url_for('life_verification') }}" class="{{ 'is-active' if request.endpoint == 'life_verification' }}">{{ icon_pulse() }} Life verification</a>
+                <a href="{{ url_for('tasks_list') }}" class="{{ 'is-active' if request.endpoint in ('tasks_list', 'task_add', 'task_edit') }}">{{ icon_check_square() }} Tasks</a>
+            </nav>
+
+            <div class="sidebar-foot">
+                <div class="user-chip">
+                    <span class="user-avatar" aria-hidden="true">{{ current_user.full_name[:1]|upper }}</span>
+                    <span class="navbar-user-name">{{ current_user.full_name }}</span>
+                </div>
+                <div class="sidebar-foot-row">
+                    <button type="button" class="btn btn-small btn-outline" aria-label="Switch between light and dark mode" onclick="toggleTheme()">
+                        <span class="theme-icon-light">{{ icon_moon(size=14) }}</span>
+                        <span class="theme-icon-dark">{{ icon_sun(size=14) }}</span> Theme
+                    </button>
+                    <form method="POST" action="{{ url_for('logout') }}" class="inline-form" style="flex:1; display:flex;"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn btn-small btn-outline btn-block">{{ icon_logout(size=14) }} Log out</button></form>
+                </div>
+            </div>
+        </aside>
+        <div class="nav-scrim" id="navScrim"></div>
+
+        <div class="app-body">
+            <header class="app-topbar">
+                <button type="button" class="navbar-toggle" id="navToggle" aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">{{ icon_menu() }}</button>
+                <a class="brand" href="{{ url_for('dashboard') }}">{{ logo_mark() }}<span class="brand-text-col"><span class="brand-name">Digital Legacy Vault</span></span></a>
+                <button type="button" class="btn btn-search-trigger" id="cmdPaletteBtn" aria-label="Search your vault" title="Search (Ctrl K)">
+                    {{ icon_search(size=15) }}
+                    <span class="search-placeholder">Search your vault</span>
+                    <span class="kbd-badge">Ctrl K</span>
+                </button>
+            </header>
+
+    {% else %}
+    <header class="navbar navbar-guest">
+        <div class="navbar-row">
+            <a class="brand" href="{{ url_for('home') }}">
+                {{ logo_mark() }}
+                <span class="brand-text-col"><span class="brand-name">Digital Legacy Vault</span></span>
+            </a>
+            <nav class="navbar-guest-links" aria-label="Site">
+                <a href="{{ url_for('home') }}#what-you-can-do">What you can do</a>
+                <a href="{{ url_for('home') }}#how-it-works">How it works</a>
+                <a href="{{ url_for('home') }}#safety">Safety</a>
+                <a href="{{ url_for('home') }}#faq">Questions</a>
+            </nav>
+            <div class="navbar-user">
+                <button type="button" class="btn btn-icon-only nav-theme-btn" aria-label="Switch between light and dark mode" onclick="toggleTheme()">
+                    <span class="theme-icon-light">{{ icon_moon(size=16) }}</span>
+                    <span class="theme-icon-dark">{{ icon_sun(size=16) }}</span>
+                </button>
+                <a href="{{ url_for('login') }}" class="btn btn-small btn-outline">Log in</a>
+                <a href="{{ url_for('register') }}" class="btn btn-small btn-primary">Create your vault</a>
+            </div>
+        </div>
+    </header>
+
+    {% endif %}
+
+    <main class="container {{ 'app-main' if current_user else 'guest-main' }}">
+        {{ flashes() }}
+        {% block content %}{% endblock %}
+    </main>
+    {{ site_footer() }}
+    {% if current_user %}
+        </div><!-- /.app-body -->
+    </div><!-- /.app-shell -->
+    {% endif %}
+
+    <script>
+        function toggleTheme() {
+            var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('dl_vault_theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('dl_vault_theme', 'dark');
+            }
+        }
+    </script>
+
+    {% if current_user %}
+    <div id="cmdPalette" class="cmd-palette-backdrop" style="display:none;" aria-hidden="true">
+        <div class="cmd-palette" role="dialog" aria-modal="true" aria-label="Search your vault">
+            <div class="cmd-input-wrap">
+                <span class="cmd-search-icon">{{ icon_search(size=18) }}</span>
+                <input type="text" id="cmdInput" class="cmd-input" placeholder="Search assets, documents, people…" autocomplete="off">
+                <span class="cmd-shortcut-hint">ESC</span>
+            </div>
+            <div id="cmdResults" class="cmd-results"></div>
+            <div class="cmd-footer">
+                <span><kbd>&uarr;</kbd> <kbd>&darr;</kbd> to move</span>
+                <span><kbd>&crarr;</kbd> to open</span>
+                <span><kbd>Esc</kbd> to close</span>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function () {
             var toggle = document.getElementById('navToggle');
             var panel = document.getElementById('navPanel');
-            if (!toggle || !panel) return;
-
-            function closeNav() {
-                panel.classList.remove('is-open');
-                toggle.setAttribute('aria-expanded', 'false');
-                toggle.setAttribute('aria-label', 'Open menu');
+            var scrim = document.getElementById('navScrim');
+            function setNav(open) {
+                if (!panel || !toggle) return;
+                panel.classList.toggle('is-open', open);
+                if (scrim) scrim.classList.toggle('is-open', open);
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
             }
-            function openNav() {
-                panel.classList.add('is-open');
-                toggle.setAttribute('aria-expanded', 'true');
-                toggle.setAttribute('aria-label', 'Close menu');
+            if (toggle && panel) {
+                toggle.addEventListener('click', function () { setNav(!panel.classList.contains('is-open')); });
+                if (scrim) scrim.addEventListener('click', function () { setNav(false); });
+                panel.querySelectorAll('a').forEach(function (link) { link.addEventListener('click', function () { setNav(false); }); });
+                window.addEventListener('resize', function () { if (window.innerWidth > 860) setNav(false); });
+                document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setNav(false); });
             }
 
-            toggle.addEventListener('click', function () {
-                if (panel.classList.contains('is-open')) { closeNav(); } else { openNav(); }
+            // Command Palette
+            var cmdBackdrop = document.getElementById('cmdPalette');
+            var cmdBtn = document.getElementById('cmdPaletteBtn');
+            var cmdInput = document.getElementById('cmdInput');
+            var cmdResults = document.getElementById('cmdResults');
+            var activeIndex = -1;
+            var currentResults = [];
+
+            if (!cmdBackdrop) return;
+
+            function openCmd() {
+                cmdBackdrop.style.display = 'flex';
+                cmdBackdrop.setAttribute('aria-hidden', 'false');
+                cmdInput.value = '';
+                cmdInput.focus();
+                searchCmd('');
+            }
+
+            function closeCmd() {
+                cmdBackdrop.style.display = 'none';
+                cmdBackdrop.setAttribute('aria-hidden', 'true');
+            }
+
+            if (cmdBtn) {
+                cmdBtn.addEventListener('click', openCmd);
+            }
+
+            cmdBackdrop.addEventListener('click', function (e) {
+                if (e.target === cmdBackdrop) closeCmd();
             });
 
-            panel.querySelectorAll('a').forEach(function (link) {
-                link.addEventListener('click', closeNav);
-            });
-
-            // Escape closes the menu and hands focus back to the button.
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && panel.classList.contains('is-open')) {
-                    closeNav();
-                    toggle.focus();
+                if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                    e.preventDefault();
+                    if (cmdBackdrop.style.display === 'flex') {
+                        closeCmd();
+                    } else {
+                        openCmd();
+                    }
+                } else if (e.key === 'Escape' && cmdBackdrop.style.display === 'flex') {
+                    closeCmd();
+                } else if (cmdBackdrop.style.display === 'flex') {
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (currentResults.length > 0) {
+                            activeIndex = (activeIndex + 1) % currentResults.length;
+                            highlightResult();
+                        }
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (currentResults.length > 0) {
+                            activeIndex = (activeIndex - 1 + currentResults.length) % currentResults.length;
+                            highlightResult();
+                        }
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (activeIndex >= 0 && activeIndex < currentResults.length) {
+                            window.location.href = currentResults[activeIndex].url;
+                        }
+                    }
                 }
             });
 
-            window.addEventListener('resize', function () {
-                if (window.innerWidth > 860) { closeNav(); }
+            var searchDebounce = null;
+            cmdInput.addEventListener('input', function () {
+                clearTimeout(searchDebounce);
+                searchDebounce = setTimeout(function () {
+                    searchCmd(cmdInput.value.trim());
+                }, 120);
             });
+
+            function searchCmd(q) {
+                fetch('/api/quick-search?q=' + encodeURIComponent(q))
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        currentResults = data.results || [];
+                        activeIndex = currentResults.length > 0 ? 0 : -1;
+                        renderResults();
+                    })
+                    .catch(function () {
+                        currentResults = [];
+                        renderResults();
+                    });
+            }
+
+            function renderResults() {
+                if (currentResults.length === 0) {
+                    cmdResults.innerHTML = '<div class="cmd-empty">No matching records or actions found.</div>';
+                    return;
+                }
+                var html = '';
+                currentResults.forEach(function (item, idx) {
+                    var isSelected = idx === activeIndex ? ' is-selected' : '';
+                    html += '<a href="' + item.url + '" class="cmd-result-item' + isSelected + '" data-idx="' + idx + '">';
+                    html += '  <div class="cmd-item-main">';
+                    html += '    <span class="cmd-item-title">' + escapeHtml(item.title) + '</span>';
+                    html += '  </div>';
+                    html += '  <span class="cmd-item-badge">' + escapeHtml(item.category) + '</span>';
+                    html += '</a>';
+                });
+                cmdResults.innerHTML = html;
+            }
+
+            function highlightResult() {
+                var items = cmdResults.querySelectorAll('.cmd-result-item');
+                items.forEach(function (el, idx) {
+                    if (idx === activeIndex) {
+                        el.classList.add('is-selected');
+                        el.scrollIntoView({ block: 'nearest' });
+                    } else {
+                        el.classList.remove('is-selected');
+                    }
+                });
+            }
+
+            function escapeHtml(str) {
+                return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
         })();
     </script>
     {% endif %}
+    <script>
+        (function () {
+            // Gentle fade-up for landing sections (skipped when motion is reduced)
+            var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var items = document.querySelectorAll('.landing-section, .cta-band');
+            if (!reduce && 'IntersectionObserver' in window && items.length) {
+                document.documentElement.classList.add('js-reveal');
+                var io = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+                }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+                items.forEach(function (el) { el.classList.add('reveal'); io.observe(el); });
+            }
+            // Table of contents for long legal pages
+            var card = document.querySelector('.legal-card');
+            var heads = card ? card.querySelectorAll('.legal-section h2') : [];
+            if (heads.length > 3) {
+                var nav = document.createElement('nav');
+                nav.className = 'legal-toc';
+                nav.setAttribute('aria-label', 'On this page');
+                var html = '<p class="legal-toc-title">On this page</p><ol>';
+                heads.forEach(function (h, i) {
+                    h.id = h.id || 'section-' + (i + 1);
+                    html += '<li><a href="#' + h.id + '">' + h.textContent.replace(/^\s*\d+\.\s*/, '') + '</a></li>';
+                });
+                nav.innerHTML = html + '</ol>';
+                var first = card.querySelector('.legal-section');
+                first.parentNode.insertBefore(nav, first);
+            }
+        })();
+    </script>
 </body>
 </html>

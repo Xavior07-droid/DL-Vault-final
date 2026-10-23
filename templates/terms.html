@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_shield, icon_scroll, icon_check %}
+{% block title %}Terms of Service — Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="legal-page-container">
+    <div class="legal-header">
+        <div class="legal-kicker">{{ icon_scroll(size=14) }} Legal Agreement</div>
+        <h1 class="legal-title">Terms of Service</h1>
+        <p class="legal-meta">Effective Date: January 1, 2024 &bull; Last Revised: October 23, 2026</p>
+    </div>
+
+    <div class="card legal-card">
+        <div class="legal-callout">
+            <div class="legal-callout-icon">{{ icon_shield(size=20) }}</div>
+            <div class="legal-callout-body">
+                <strong>Non-Custodial Architecture Summary:</strong> Digital Legacy Vault is a sovereign personal archive tool. We do not hold custody of your assets, funds, passwords, or private keys. You retain 100% ownership and control over your records.
+            </div>
+        </div>
+
+        <section class="legal-section">
+            <h2>1. Acceptance of Terms</h2>
+            <p>By accessing or using Digital Legacy Vault ("the Service", "DLV", "we", "us", or "our"), you ("User", "you") acknowledge that you have read, understood, and agreed to be legally bound by these Terms of Service ("Terms"). If you do not agree with any part of these Terms, you must discontinue use of the Service immediately.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>2. Description of Service</h2>
+            <p>Digital Legacy Vault is a private, client-encrypted, non-custodial estate planning and digital inheritance coordination platform. The Service provides tools allowing registered users to record, categorize, cryptographically seal, and designate the disposition of personal assets, legal documents, digital accounts, and testamentary directives to nominated beneficiaries.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>3. Non-Custodial Nature</h2>
+            <p>DLV is strictly a non-custodial organizational software tool. We do not hold, broker, custody, transfer, transmit, or control any of your fiat funds, cryptocurrency assets, real property deeds, physical possessions, or personal documents on your behalf. All estate directives remain within your sole ownership and control. DLV does not possess the cryptographic capability or master administrative keys to decrypt your client-side encrypted credentials, recover lost passwords, or execute financial transactions on your behalf.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>4. User Eligibility</h2>
+            <p>You must be at least eighteen (18) years of age and legally competent to enter into binding legal agreements under the laws of your applicable jurisdiction. By creating an account, you represent and warrant that you meet these eligibility criteria and that your use of the Service complies with all local statutory rules.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>5. Account Responsibility & Master Password</h2>
+            <p>You are solely and exclusively responsible for safeguarding the credentials, master password, and device access mechanisms associated with your vault account. Because your vault relies on zero-knowledge encryption principles, <strong>DLV cannot reset your master password or recover encrypted payload content if your master passphrase is forgotten or lost</strong>. Any activity initiated from your authenticated session is deemed authorized by you.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>6. Data Ownership and Privacy</h2>
+            <p>All records, directives, instructions, filenames, and data you submit into the Service belong exclusively and unreservedly to you. DLV does not sell, license, monetize, rent, or disclose your personal information to third-party data brokers, marketers, or analytics networks. Data is processed locally and stored in encrypted form. For complete details on storage, please review our <a href="{{ url_for('privacy') }}">Privacy Policy</a>.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>7. Acceptable Use</h2>
+            <p>You agree to use the Service solely for lawful, bona fide estate planning purposes. You shall not use DLV to store records of illegally obtained assets or proceeds of crime, impersonate other living or deceased individuals, circumvent authentication mechanisms, attempt unauthorized access to other vaults, or upload malicious executable code. Violations will result in immediate termination pursuant to our <a href="{{ url_for('acceptable_use') }}">Acceptable Use Policy</a>.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>8. Legal Validity & Non-Attorney Disclaimer</h2>
+            <p><strong>DLV DOES NOT PROVIDE LEGAL ADVICE, TAX COUNSEL, OR FINANCIAL FIDUCIARY SERVICES.</strong> The Service, its documentation tools, automated Will Checkers, and downloadable PDF dossiers serve exclusively as organizational, inventory, and testamentary reference aids. The generation of a dossier does NOT automatically create a legally probated Will, Testamentary Trust, or Court-certified decree in any jurisdiction without formal compliance with local statutory execution requirements (such as wet-ink physical attestation by two independent witnesses). Users are strongly urged to consult a licensed advocate, solicitor, or notary public in their jurisdiction.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>9. Blockchain Notarization & Decentralized Networks</h2>
+            <p>Document notarization features interact with the Polygon Amoy public blockchain. Hashes anchored on-chain are irreversible cryptographic fingerprints (SHA-256) designed solely for tamper detection and timestamp verification. Anchoring a hash does not constitute official court notarization or governmental registry filing. Interaction with Web3 wallets is governed by the respective providers (e.g., MetaMask, Polygon).</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>10. Limitation of Liability</h2>
+            <p>To the maximum extent permitted by applicable law, in no event shall Digital Legacy Vault, its developers, operators, or affiliates be liable for any indirect, punitive, incidental, special, or consequential damages (including loss of data, loss of anticipated estate inheritance, or system downtime) arising out of or related to your use of the Service. Our aggregate liability for all claims arising hereunder shall not exceed the total fees paid by you to DLV in the twelve (12) months preceding the claim, or ₹1,000 INR (whichever is lower).</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>11. Service Availability & "As-Is" Warranty</h2>
+            <p>The Service is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind, whether express, statutory, or implied. While we employ rigorous database integrity protections, we do not warrant that service operation will be uninterrupted, error-free, or resilient against catastrophic local hardware failure.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>12. Modifications to Terms</h2>
+            <p>We reserve the right to revise these Terms periodically. Substantive modifications will be reflected by an updated revision date at the top of this document. Continued usage of the Service following published updates constitutes binding acceptance of the amended Terms.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>13. Governing Law & Dispute Resolution</h2>
+            <p>These Terms and any disputes arising out of or in connection with the Service shall be governed by, construed, and enforced in accordance with the laws of India, without regard to its conflict of law principles. Any legal action or proceeding relating to the Service shall be instituted exclusively in the competent courts located in India.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>14. Contact Information</h2>
+            <p>For questions or formal legal notices concerning these Terms, please contact our legal desk via email at <a href="mailto:legal@digitallegacyvault.io">legal@digitallegacyvault.io</a> or submit a message through our <a href="{{ url_for('contact') }}">Contact Page</a>.</p>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -1,13 +1,19 @@
 {% extends "base.html" %}
-{% from "components.html" import empty_state, icon_plus, icon_users, icon_box %}
+{% from "components.html" import empty_state, icon_plus, icon_users, icon_box, icon_sync %}
 {% block title %}Assets - Digital Legacy Vault{% endblock %}
 {% block content %}
 <div class="page-header">
     <div>
         <h2>Your assets</h2>
-        <p class="text-muted page-header-sub">Property, accounts, and anything else you'd want passed on.</p>
+        <p class="text-muted page-header-sub">Property, accounts and other holdings. Total value: <b>₹{{ "{:,.2f}".format(total_estate_value) if total_estate_value else "0.00" }}</b></p>
     </div>
-    <a href="{{ url_for('asset_add') }}" class="btn btn-primary">{{ icon_plus() }} Add asset</a>
+    <div class="header-actions-row">
+        <form method="POST" action="{{ url_for('assets_sync') }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-outline" title="Refresh the values of linked wallets">{{ icon_sync(size=14) }} Refresh values</button>
+        </form>
+        <a href="{{ url_for('asset_add') }}" class="btn btn-primary">{{ icon_plus() }} Add asset</a>
+    </div>
 </div>
 
 {% if assets %}
@@ -16,7 +22,7 @@
         <tr>
             <th>Name</th>
             <th>Category</th>
-            <th>Provider</th>
+            <th>Provider / Ref</th>
             <th>Value</th>
             <th>Nominees</th>
             <th>Actions</th>
@@ -25,10 +31,18 @@
     <tbody>
         {% for asset in assets %}
         <tr>
-            <td data-label="Name"><span class="cell-primary">{{ asset.name }}</span></td>
+            <td data-label="Name">
+                <span class="cell-primary">{{ asset.name }}</span>
+                {% if asset.wallet_address %}
+                <div class="text-small text-muted" style="margin-top: 2px;">
+                    <code class="hash-code-inline">{{ asset.wallet_address[:8] }}...{{ asset.wallet_address[-6:] }}</code>
+                    {% if asset.last_synced_at %}• Synced {{ asset.last_synced_at.strftime('%d %b') }}{% endif %}
+                </div>
+                {% endif %}
+            </td>
             <td data-label="Category"><span class="tag-pill">{{ asset.category }}</span></td>
-            <td data-label="Provider">{{ asset.provider or "—" }}</td>
-            <td data-label="Value">{% if asset.approx_value %}${{ "{:,.2f}".format(asset.approx_value) }}{% else %}—{% endif %}</td>
+            <td data-label="Provider">{{ asset.provider or "—" }}{% if asset.reference %}<br/><span class="text-small text-muted">{{ asset.reference }}</span>{% endif %}</td>
+            <td data-label="Value">{% if asset.approx_value %}₹{{ "{:,.2f}".format(asset.approx_value) }}{% else %}—{% endif %}</td>
             <td data-label="Nominees">
                 {% if asset.nominees %}
                     {{ asset.nominees | map(attribute="name") | join(", ") }}

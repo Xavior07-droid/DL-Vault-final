@@ -37,13 +37,82 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="instructions">Anything else they should know? <span class="text-muted">(optional)</span></label>
+            <label for="instructions">Instructions / Recovery notes <span class="text-muted">(optional)</span></label>
             <textarea id="instructions" name="instructions" rows="3" placeholder="e.g. Keep the photos, close everything else">{{ account.instructions if account else '' }}</textarea>
         </div>
+
+        <!-- Zero-Knowledge Client-Side Encryption (Feature 1) -->
+        <div class="card" style="background: var(--surface-sunken); border: 1px dashed var(--border-strong); padding: 14px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="is_encrypted" name="is_encrypted" value="1" {% if account and account.is_encrypted %}checked{% endif %} onchange="toggleEncryptionFields()">
+                <label for="is_encrypted" style="margin: 0; font-weight: 600; cursor: pointer;">
+                    Lock these notes with a passphrase
+                </label>
+            </div>
+            <p class="text-small text-muted" style="margin: 6px 0 0 24px;">
+                Your recovery notes are scrambled in your browser before they are saved. Only the passphrase can unlock them.
+            </p>
+            <div id="encPassphraseWrap" style="margin: 12px 0 0 24px; display: {% if account and account.is_encrypted %}block{% else %}none{% endif %};">
+                <label for="master_passphrase" class="text-small" style="font-weight: 500;">Passphrase</label>
+                <input type="password" id="master_passphrase" placeholder="Choose a passphrase" style="max-width: 380px;">
+                <span class="form-hint">Remember this passphrase. If you lose it, nobody can recover these notes, including us.</span>
+            </div>
+            <input type="hidden" id="encrypted_notes" name="encrypted_notes" value="{{ account.encrypted_notes if account and account.encrypted_notes else '' }}">
+        </div>
+
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">{{ "Save changes" if account else "Add account" }}</button>
+            <button type="submit" id="submitBtn" class="btn btn-primary">{{ "Save changes" if account else "Add account" }}</button>
             <a href="{{ url_for('digital_accounts_list') }}" class="btn btn-outline">Cancel</a>
         </div>
     </form>
 </div>
+
+<script>
+function toggleEncryptionFields() {
+    var cb = document.getElementById('is_encrypted');
+    var wrap = document.getElementById('encPassphraseWrap');
+    wrap.style.display = cb.checked ? 'block' : 'none';
+}
+
+document.querySelector('form').addEventListener('submit', async function (e) {
+    var isEnc = document.getElementById('is_encrypted').checked;
+    var pass = document.getElementById('master_passphrase').value;
+    var instr = document.getElementById('instructions').value;
+
+    if (isEnc && pass) {
+        e.preventDefault();
+        try {
+            var encBundle = await encryptWithPassphrase(instr, pass);
+            document.getElementById('encrypted_notes').value = encBundle;
+            document.getElementById('instructions').value = "[Zero-Knowledge Encrypted Directives]";
+            this.submit();
+        } catch (err) {
+            alert("Encryption error: " + err.message);
+        }
+    }
+});
+
+async function encryptWithPassphrase(text, passphrase) {
+    var enc = new TextEncoder();
+    var salt = window.crypto.getRandomValues(new Uint8Array(16));
+    var iv = window.crypto.getRandomValues(new Uint8Array(12));
+    var keyMaterial = await window.crypto.subtle.importKey(
+        "raw", enc.encode(passphrase), "PBKDF2", false, ["deriveKey"]
+    );
+    var key = await window.crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+        keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt"]
+    );
+    var ciphertext = await window.crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv }, key, enc.encode(text)
+    );
+    function b64(buf) {
+        var bin = '';
+        var bytes = new Uint8Array(buf);
+        for (var i = 0; i < bytes.byteLength; i++) { bin += String.fromCharCode(bytes[i]); }
+        return btoa(bin);
+    }
+    return "v1:" + b64(salt) + ":" + b64(iv) + ":" + b64(ciphertext);
+}
+</script>
 {% endblock %}

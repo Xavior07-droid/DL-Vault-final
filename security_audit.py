@@ -64,14 +64,14 @@ def cleanup():
 cleanup()
 try:
     # ---- 1. Configuration & static scans ---------------------------------
-    src = open("app.py").read()
+    src = open("app.py", encoding="utf-8").read()
     check("SECRET_KEY is not hardcoded", not re.search(r'SECRET_KEY\s*=\s*["\']', src))
     check("database path comes from the environment", 'os.environ.get(\n    "DATABASE_PATH"' in src or "DATABASE_PATH" in src and "os.environ" in src)
-    check(".env is gitignored", ".env" in open(".gitignore").read().split())
+    check(".env is gitignored", ".env" in open(".gitignore", encoding="utf-8").read().split())
 
     missing = []
     for path in glob.glob("templates/*.html"):
-        text = open(path).read()
+        text = open(path, encoding="utf-8").read()
         for m in re.finditer(r"<form\b[^>]*>(.*?)</form>", text, re.S | re.I):
             if re.search(r'method=["\']?post', m.group(0)[:300], re.I) and "csrf_token" not in m.group(0):
                 missing.append(path)

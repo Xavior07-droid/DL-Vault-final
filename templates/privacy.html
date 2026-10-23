@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_shield, icon_check %}
+{% block title %}Privacy Policy — Digital Legacy Vault{% endblock %}
+{% block content %}
+<div class="legal-page-container">
+    <div class="legal-header">
+        <div class="legal-kicker">{{ icon_shield(size=14) }} Data Protection</div>
+        <h1 class="legal-title">Privacy Policy</h1>
+        <p class="legal-meta">Effective Date: January 1, 2024 &bull; Last Revised: October 23, 2026</p>
+    </div>
+
+    <div class="card legal-card">
+        <div class="legal-callout">
+            <div class="legal-callout-icon">{{ icon_shield(size=20) }}</div>
+            <div class="legal-callout-body">
+                <strong>Zero-Knowledge Principle:</strong> We believe what you leave behind is sacred and strictly private. We do not track you, sell your information, or hold server-side keys to your client-side encrypted credentials.
+            </div>
+        </div>
+
+        <section class="legal-section">
+            <h2>1. Introduction & Scope</h2>
+            <p>This Privacy Policy outlines how Digital Legacy Vault ("DLV", "we", "our") handles, stores, and protects information when you utilize our platform. We operate under rigorous data minimization principles: we collect only what is strictly necessary to maintain your authenticated vault session.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>2. Information We Collect</h2>
+            <ul>
+                <li><strong>Account Identity:</strong> Your full name, email address, and an irreversible bcrypt cryptographic hash of your password. Your plaintext password is never known or stored.</li>
+                <li><strong>Vault Records:</strong> Metadata for declared assets, nominee designations, will directives, and tasks. These records are held within your sovereign vault database instance.</li>
+                <li><strong>Uploaded Documents:</strong> Stored under randomized non-identifiable identifiers in an isolated storage directory. Original filenames are preserved within your database record only.</li>
+                <li><strong>Verification Directives:</strong> Trusted contact names, relationships, and multi-party quorum status numbers used solely to facilitate the simulated heartbeat protocol.</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2>3. Client-Side Cryptography (AES-GCM-256)</h2>
+            <p>Sensitive digital legacy credentials and master recovery notes are encrypted directly in your browser prior to transmission via WebCrypto AES-GCM-256 with key derivation via PBKDF2 (100,000 iterations and unique cryptographic salts). The server receives and stores only ciphertext. Decryption occurs exclusively in client memory upon providing your passphrase.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>4. What We Do NOT Collect</h2>
+            <p>We adamantly reject invasive surveillance models. DLV does <strong>NOT</strong> collect:</p>
+            <ul>
+                <li>IP tracking or behavioral tracking across external websites</li>
+                <li>Third-party marketing cookies or browser fingerprinting scripts</li>
+                <li>Biometric records or location telemetry data</li>
+                <li>Unencrypted seed phrases, wallet private keys, or bank passwords</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2>5. Cookies & Session Management</h2>
+            <p>We use only an essential HTTP-only, secure, samesite-configured session cookie required to maintain your logged-in session. No third-party analytics pixels (Google Analytics, Meta Pixel, or data aggregators) exist anywhere within the codebase.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>6. Third-Party Data Sharing</h2>
+            <p>We do not sell, rent, monetize, or barter user information under any circumstances. Data is never shared with advertising networks. Data is disclosed only if strictly compelled by a valid, legally enforceable court order or subpoena issued under Indian jurisdiction.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>7. Blockchain Transparency & On-Chain Data</h2>
+            <p>If you choose to anchor a document verification proof to the Polygon Amoy blockchain, only the irreversible 32-byte SHA-256 hash fingerprint is recorded on the public distributed ledger. <strong>Your actual file content, title, and personal identity are never published on-chain.</strong></p>
+        </section>
+
+        <section class="legal-section">
+            <h2>8. Data Retention & Deletion Rights</h2>
+            <p>Your records remain active for the lifespan of your account. When you delete a document, the stored physical file on disk and its cryptographic proofs are purged immediately. When an account is terminated, all linked assets, instructions, and credentials are completely and irreversibly erased from the database.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>9. Your Sovereign Rights</h2>
+            <p>You maintain full sovereignty over your vault records, including the right to:</p>
+            <ul>
+                <li>Inspect and export your complete estate inventory dossier at any time as an offline PDF.</li>
+                <li>Amend, update, or remove any asset, nominee, or instruction without penalty.</li>
+                <li>Purge your entire vault profile and all associated data records immediately.</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2>10. Minors' Privacy</h2>
+            <p>The Service is designed strictly for adult users aged 18 and older. We do not knowingly solicit or maintain data from minors.</p>
+        </section>
+
+        <section class="legal-section">
+            <h2>11. Privacy Contact</h2>
+            <p>For questions or requests concerning your privacy rights, please reach out to our privacy compliance officer at <a href="mailto:privacy@digitallegacyvault.io">privacy@digitallegacyvault.io</a>.</p>
+        </section>
+    </div>
+</div>
+{% endblock %}

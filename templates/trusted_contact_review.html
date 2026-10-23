@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_shield, icon_alert, icon_check, icon_x, icon_heart_handshake %}
+{% block title %}Quorum Review - {{ owner.full_name }}'s Vault{% endblock %}
+{% block content %}
+
+<div class="claim-portal-hero">
+    <div class="claim-portal-badge-row">
+        <span class="badge badge-warning">{{ icon_shield(size=14) }} Your confirmation is needed</span>
+        {% if life.status == "VAULT_UNLOCKED" %}
+        <span class="badge badge-pass">Enough contacts confirmed. Vault unlocked.</span>
+        {% else %}
+        <span class="badge badge-action">{{ approved_count }} of {{ life.quorum_required }} confirmations received</span>
+        {% endif %}
+    </div>
+
+    <h2>A request about {{ owner.full_name }}</h2>
+    <p class="text-muted claim-portal-desc">
+        Hello <b>{{ contact.name }}</b>. You were designated by <b>{{ owner.full_name }}</b> as a Trusted Contact ({{ contact.relationship_ }})
+        for their Digital Legacy Vault.
+    </p>
+</div>
+
+<div class="card review-instruction-card">
+    <div class="dash-life-icon dash-life-icon-warn">{{ icon_heart_handshake(size=28) }}</div>
+    <div>
+        <h3>Why you’re being asked</h3>
+        <p class="text-muted">
+            {{ owner.full_name }} asked you to be one of the people who confirms when the time has come. Nothing is released automatically. Their vault only opens for the people they chose when at least
+            <b>{{ life.quorum_required }} of {{ total_contacts }}</b> trusted contacts each confirm that {{ owner.full_name }} has passed away or can no longer manage their affairs.
+        </p>
+    </div>
+</div>
+
+<div class="card review-status-card">
+    <h3>Your decision</h3>
+    {% if contact.approval_status == "APPROVED" %}
+    <div class="decision-badge-row">
+        <span class="badge badge-pass">{{ icon_check(size=14) }} You Confirmed &amp; Approved Release</span>
+        <span class="text-small text-muted">Recorded on {{ contact.approved_at.strftime("%d %b %Y, %H:%M UTC") if contact.approved_at else "Recently" }}</span>
+    </div>
+    {% if contact.approval_notes %}
+    <p class="text-small text-muted">Notes: <i>{{ contact.approval_notes }}</i></p>
+    {% endif %}
+    <p class="text-muted">Thank you for fulfilling your duty as a trusted contact. The system will unlock directives once the remaining quorum requirements are met.</p>
+
+    {% elif contact.approval_status == "REJECTED" %}
+    <div class="decision-badge-row">
+        <span class="badge badge-danger">{{ icon_x(size=14) }} You Reported a False Alarm / Rejected</span>
+        <span class="text-small text-muted">Recorded on {{ contact.approved_at.strftime("%d %b %Y, %H:%M UTC") if contact.approved_at else "Recently" }}</span>
+    </div>
+    {% if contact.approval_notes %}
+    <p class="text-small text-muted">Notes: <i>{{ contact.approval_notes }}</i></p>
+    {% endif %}
+    <p class="text-muted">You have flagged this alert as invalid. The vault will remain sealed to protect {{ owner.full_name }}'s estate.</p>
+
+    {% else %}
+    <p class="text-muted">
+        Please verify the status of {{ owner.full_name }}. If you have verified death or legal incapacity (e.g. through a hospital or death certificate),
+        you may approve the release. If this is a false alarm or {{ owner.full_name }} is well, please reject the request.
+    </p>
+
+    <form method="POST" action="{{ url_for('trusted_contact_review_action', token=contact.approval_token) }}" class="review-action-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label for="notes">Notes (optional)</label>
+            <textarea id="notes" name="notes" rows="2" class="form-control" placeholder="e.g. Death Certificate #, Hospital confirmation reference, or verification details..."></textarea>
+        </div>
+
+        <div class="review-buttons-row">
+            <button type="submit" name="decision" value="approve" class="btn btn-primary" onclick="return confirm('Confirm that you have verified {{ owner.full_name }}\'s status and approve unlocking their estate directives?');">
+                {{ icon_check(size=14) }} Yes, approve release
+            </button>
+            <button type="submit" name="decision" value="reject" class="btn btn-danger" onclick="return confirm('Report this as a false alarm and keep the vault locked?');">
+                {{ icon_x(size=14) }} No, this is a false alarm
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+
+{% endblock %}

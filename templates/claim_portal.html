@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% from "components.html" import icon_box, icon_scroll, icon_file, icon_shield, icon_download, empty_state, icon_alert %}
+{% block title %}Estate Claim Portal - {{ nominee.name }}{% endblock %}
+{% block content %}
+
+<div class="claim-portal-hero">
+    <div class="claim-portal-badge-row">
+        {% if is_unlocked %}
+        <span class="badge badge-pass">{{ icon_shield(size=14) }} Unlocked</span>
+        {% else %}
+        <span class="badge badge-warning">{{ icon_alert(size=14) }} Still sealed</span>
+        {% endif %}
+        {% if is_preview %}
+        <span class="badge badge-action">Preview, only you can see this</span>
+        {% endif %}
+    </div>
+
+    <h2>What {{ owner.full_name }} has shared with you</h2>
+    <p class="text-muted claim-portal-desc">
+        Shared with you, {{ nominee.name }}, as {{ nominee.relationship_ }}.
+        You can only see what was set aside for you.
+    </p>
+</div>
+
+{% if not is_unlocked %}
+<div class="card claim-locked-card">
+    <div class="dash-life-icon dash-life-icon-warn">{{ icon_shield(size=32) }}</div>
+    <div class="claim-locked-text">
+        <h3>This vault is still sealed</h3>
+        <p class="text-muted">
+            The estate directives established by {{ owner.full_name }} remain privately secured.
+            In the event that life verification check-ins are missed and the required trusted contact quorum protocol is confirmed,
+            this portal will automatically unlock your allocated assets, legal documents, and inheritance instructions.
+        </p>
+        <p class="text-small text-muted">There’s nothing you need to do right now.</p>
+    </div>
+</div>
+{% else %}
+
+<div class="claim-section">
+    <h3 class="section-card-title">{{ icon_box(size=18) }} Assets set aside for you</h3>
+    {% if assets %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Asset</th>
+                <th>Category</th>
+                <th>Provider</th>
+                <th>Reference</th>
+                <th>Estimated value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in assets %}
+            <tr>
+                <td data-label="Asset Name"><b>{{ a.name }}</b></td>
+                <td data-label="Category"><span class="tag-pill">{{ a.category }}</span></td>
+                <td data-label="Provider">{{ a.provider or "—" }}</td>
+                <td data-label="Reference">{{ a.reference or "—" }}</td>
+                <td data-label="Value">{% if a.approx_value %}₹{{ "{:,.2f}".format(a.approx_value) }}{% else %}—{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">Nothing has been assigned to you yet.</p>
+    {% endif %}
+</div>
+
+<div class="claim-section">
+    <h3 class="section-card-title">{{ icon_scroll(size=18) }} Instructions for you</h3>
+    {% if instructions %}
+    <div class="instructions-claim-grid">
+        {% for ins in instructions %}
+        <div class="card instruction-claim-card">
+            <div class="ins-card-header">
+                <span class="ins-asset-name">{{ ins.asset.name if ins.asset else "General instruction" }}</span>
+                <span class="badge badge-action">For you</span>
+            </div>
+            <p class="ins-text">{{ ins.instruction_text }}</p>
+            <div class="ins-meta text-small text-muted">Recorded: {{ ins.created_at.strftime("%d %b %Y") }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">There are no instructions for you on file.</p>
+    {% endif %}
+</div>
+
+<div class="claim-section">
+    <h3 class="section-card-title">{{ icon_file(size=18) }} Documents</h3>
+    {% if documents %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Document</th>
+                <th>Category</th>
+                <th>Fingerprint</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td data-label="Document"><b>{{ doc.original_filename }}</b></td>
+                <td data-label="Category"><span class="tag-pill">{{ doc.category }}</span></td>
+                <td data-label="Fingerprint">
+                    {% if doc.proof %}
+                    <code class="hash-code-inline">{{ doc.proof.sha256_hash[:20] }}...</code>
+                    {% else %}
+                    <span class="text-muted">Unsealed</span>
+                    {% endif %}
+                </td>
+                <td class="actions">
+                    <a href="{{ url_for('claim_document_download', token=nominee.claim_token, document_id=doc.id) }}" class="btn btn-small btn-outline">
+                        {{ icon_download() }} Download
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No documents have been attached.</p>
+    {% endif %}
+</div>
+
+{% endif %}
+
+{% endblock %}
