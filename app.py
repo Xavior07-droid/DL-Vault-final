@@ -141,6 +141,7 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 app.config["SESSION_COOKIE_SECURE"] = IS_PRODUCTION
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_NAME"] = "__session"
 
 os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
