@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "public": "public",
+    "redirects": [
+      {
+        "source": "**",
+        "destination": "https://dl-vault.onrender.com",
+        "type": 302
+      }
+    ]
+  }
+}

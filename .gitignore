@@ -14,3 +14,5 @@ Thumbs.db
 # Uploaded documents are private — never commit them
 uploads/*
 !uploads/.gitkeep
+# Firebase cache
+.firebase/
